@@ -1,0 +1,164 @@
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
+
+:root {
+  --font-sans: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-serif: 'Newsreader', Georgia, Cambria, 'Times New Roman', serif;
+  --font-display: 'Plus Jakarta Sans', var(--font-sans);
+
+  /* Light Theme: Notion Warm Paper & Editorial Palette */
+  --bg-primary: #FAF9F6;           /* 차분한 웜 오프화이트 종이 질감 */
+  --bg-surface: #FFFFFF;           /* 깨끗한 카드 표면 */
+  --bg-surface-elevated: #FFFFFF;
+  --bg-subtle: #F3F1EC;            /* 은은한 웜 그레이 */
+  --bg-subtle-hover: #EBE8E1;
+  --bg-modal: #FFFFFF;
+  --bg-hover: #F6F4EE;
+
+  --border-color: #E6E3DC;         /* 정갈한 1px 보더 */
+  --border-subtle: #ECE9E2;
+  --border-focus: #2D3748;
+
+  --text-primary: #232220;         /* 딥 잉크 차콜 */
+  --text-secondary: #575550;       /* 자연스러운 그레이 */
+  --text-muted: #85837D;           /* 차분한 보조 텍스트 */
+  --text-inverse: #FFFFFF;
+
+  /* PARA Category Colors - Calm, Mature, Muted Tones */
+  --project-color: #C0392B;        /* 클래식 브릭 레드 */
+  --project-light: #FDF3F2;
+  --project-border: #F6C8C4;
+
+  --area-color: #24587A;           /* 차분한 딥 오션 */
+  --area-light: #EFF5F9;
+  --area-border: #C8DCED;
+
+  --resource-color: #2A6E53;       /* 포레스트 세이지 */
+  --resource-light: #EFF7F3;
+  --resource-border: #C4E5D5;
+
+  --archive-color: #6B5B95;        /* 빈티지 라벤더 */
+  --archive-light: #F5F3F9;
+  --archive-border: #DCD6EA;
+
+  --notion-color: #232220;
+  --notion-accent: #2A6E53;
+
+  --brand-primary: #2C3539;        /* 에디토리얼 슬레이트 잉크 */
+  --brand-hover: #1A1F22;
+  --brand-light: #EFEFEA;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 3px 8px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.02);
+  --shadow-lg: 0 8px 20px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.03);
+  --shadow-xl: 0 16px 36px rgba(0, 0, 0, 0.08);
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-full: 9999px;
+}
+
+[data-theme="dark"] {
+  /* Dark Theme: Notion Minimalist Dark */
+  --bg-primary: #181818;
+  --bg-surface: #202020;
+  --bg-surface-elevated: #262626;
+  --bg-subtle: #272727;
+  --bg-subtle-hover: #323232;
+  --bg-modal: #222222;
+  --bg-hover: #292929;
+
+  --border-color: #313131;
+  --border-subtle: #2A2A2A;
+  --border-focus: #9E9E9E;
+
+  --text-primary: #ECECEC;
+  --text-secondary: #B4B4B4;
+  --text-muted: #7E7E7E;
+  --text-inverse: #181818;
+
+  --project-color: #E57373;
+  --project-light: rgba(229, 115, 115, 0.12);
+  --project-border: rgba(229, 115, 115, 0.25);
+
+  --area-color: #64B5F6;
+  --area-light: rgba(100, 181, 246, 0.12);
+  --area-border: rgba(100, 181, 246, 0.25);
+
+  --resource-color: #81C784;
+  --resource-light: rgba(129, 199, 132, 0.12);
+  --resource-border: rgba(129, 199, 132, 0.25);
+
+  --archive-color: #B39DDB;
+  --archive-light: rgba(179, 157, 219, 0.12);
+  --archive-border: rgba(179, 157, 219, 0.25);
+
+  --notion-color: #ECECEC;
+  --notion-accent: #81C784;
+
+  --brand-primary: #E0E0E0;
+  --brand-hover: #FFFFFF;
+  --brand-light: #2C2C2C;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 10px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6);
+  --shadow-xl: 0 16px 40px rgba(0, 0, 0, 0.7);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  letter-spacing: -0.01em;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  transition: all 0.15s ease;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+/* Custom Scrollbar - Minimal */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: var(--radius-full);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}

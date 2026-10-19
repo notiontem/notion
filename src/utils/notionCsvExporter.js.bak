@@ -1,0 +1,169 @@
+/**
+ * Utility to export Ministry Second Brain data into Notion-compatible CSV format.
+ * Includes UTF-8 BOM to prevent Korean character distortion in Excel and Notion.
+ */
+
+// Escape CSV field properly
+function escapeCsv(field) {
+  if (field === null || field === undefined) return '""';
+  const str = String(field);
+  // If field contains comma, quote, or newline, escape it
+  if (str.includes(',') || str.includes('"') || str.includes('\n') || str.includes('\r')) {
+    return `"${str.replace(/"/g, '""')}"`;
+  }
+  return `"${str}"`;
+}
+
+// Download helper with UTF-8 BOM
+function downloadCsvFile(csvContent, filename) {
+  const BOM = '\uFEFF';
+  const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', filename);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
+/**
+ * Export Projects to Notion-compatible CSV
+ * Columns align with Notion Project Database properties:
+ * Name(프로젝트명), Status(상태), Deadline(마감일), Area(소속영역), Goal(핵심목표), Tags(태그), WBS_Total, Progress(진척도)
+ */
+export function exportProjectsToCsv(projects, areas = []) {
+  const areaMap = {};
+  areas.forEach(a => {
+    areaMap[a.id] = a.name;
+  });
+
+  const headers = [
+    "프로젝트명 (Name)",
+    "상태 (Status)",
+    "마감일 (Deadline)",
+    "소속 영역 (Area)",
+    "핵심 목표 (Goal)",
+    "태그 (Tags)",
+    "진척도 (Progress)",
+    "세부 실행 과제 (WBS Tasks)",
+    "기획 메모 (Notes)"
+  ];
+
+  const rows = projects.map(p => {
+    const wbsDone = p.wbs ? p.wbs.filter(w => w.done).length : 0;
+    const wbsTotal = p.wbs ? p.wbs.length : 0;
+    const progress = wbsTotal > 0 ? `${Math.round((wbsDone / wbsTotal) * 100)}%` : '0%';
+    const wbsTasks = p.wbs ? p.wbs.map(w => `[${w.done ? 'V' : ' '}] ${w.task}`).join(' | ') : '';
+    const tags = Array.isArray(p.tags) ? p.tags.join(', ') : (p.tags || '');
+    const areaName = areaMap[p.areaId] || p.areaId || '';
+
+    return [
+      escapeCsv(p.title),
+      escapeCsv(p.status),
+      escapeCsv(p.deadline),
+      escapeCsv(areaName),
+      escapeCsv(p.goal),
+      escapeCsv(tags),
+      escapeCsv(progress),
+      escapeCsv(wbsTasks),
+      escapeCsv(p.notes || '')
+    ].join(',');
+  });
+
+  const csv = [headers.join(','), ...rows].join('\n');
+  const today = new Date().toISOString().split('T')[0];
+  downloadCsvFile(csv, `노션_프로젝트_DB_${today}.csv`);
+}
+
+/**
+ * Export Resources to Notion-compatible CSV
+ * Columns: 자료명 (Title), 분류 (Category), 태그 (Tags), 핵심 요약 (Summary), 자료 내용 (Content)
+ */
+export function exportResourcesToCsv(resources) {
+  const headers = [
+    "자료명 (Title)",
+    "분류 (Category)",
+    "태그 (Tags)",
+    "핵심 요약 (Summary)",
+    "자료 내용 (Content)"
+  ];
+
+  const rows = resources.map(r => {
+    const tags = Array.isArray(r.tags) ? r.tags.join(', ') : (r.tags || '');
+    return [
+      escapeCsv(r.title),
+      escapeCsv(r.category),
+      escapeCsv(tags),
+      escapeCsv(r.summary),
+      escapeCsv(r.content || '')
+    ].join(',');
+  });
+
+  const csv = [headers.join(','), ...rows].join('\n');
+  const today = new Date().toISOString().split('T')[0];
+  downloadCsvFile(csv, `노션_리소스_지식창고_DB_${today}.csv`);
+}
+
+/**
+ * Export Areas to Notion-compatible CSV
+ * Columns: 영역명 (Name), 식별코드 (Code), 담당 리더 (Leader), 사역 기준 (Standard), 주간 루틴 (Routines)
+ */
+export function exportAreasToCsv(areas) {
+  const headers = [
+    "영역명 (Name)",
+    "식별코드 (Code)",
+    "담당 리더 (Leader)",
+    "사역 기준 및 헌장 (Standard)",
+    "핵심 루틴 (Routines)"
+  ];
+
+  const rows = areas.map(a => {
+    const routines = Array.isArray(a.routines) ? a.routines.join(' | ') : (a.routines || '');
+    return [
+      escapeCsv(a.name),
+      escapeCsv(a.code),
+      escapeCsv(a.leader),
+      escapeCsv(a.standard),
+      escapeCsv(routines)
+    ].join(',');
+  });
+
+  const csv = [headers.join(','), ...rows].join('\n');
+  const today = new Date().toISOString().split('T')[0];
+  downloadCsvFile(csv, `노션_책임영역_DB_${today}.csv`);
+}
+
+/**
+ * Export Archives to Notion-compatible CSV
+ */
+export function exportArchivesToCsv(archives, areas = []) {
+  const areaMap = {};
+  areas.forEach(a => {
+    areaMap[a.id] = a.name;
+  });
+
+  const headers = [
+    "보관 사역명 (Title)",
+    "완료일 (Completed Date)",
+    "관련 영역 (Area)",
+    "사역 성과 요약 (Summary)",
+    "AAR 사역 회고 (Retrospective)"
+  ];
+
+  const rows = archives.map(arch => {
+    const areaName = areaMap[arch.originalArea] || arch.originalArea || '';
+    return [
+      escapeCsv(arch.title),
+      escapeCsv(arch.completedDate),
+      escapeCsv(areaName),
+      escapeCsv(arch.summary),
+      escapeCsv(arch.retrospective || '')
+    ].join(',');
+  });
+
+  const csv = [headers.join(','), ...rows].join('\n');
+  const today = new Date().toISOString().split('T')[0];
+  downloadCsvFile(csv, `노션_아카이브_보관함_DB_${today}.csv`);
+}
