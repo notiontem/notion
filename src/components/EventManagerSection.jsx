@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Calendar,
   Plus,
@@ -11,6 +11,7 @@ import {
   Settings,
   Search,
   Download,
+  Upload,
   CheckCircle2,
   XCircle,
   AlertCircle,
@@ -20,6 +21,9 @@ import {
   Sparkles,
   Phone,
   ShieldAlert,
+  ShieldCheck,
+  ClipboardCheck,
+  FileSpreadsheet,
   ChevronRight,
   CheckSquare,
   Square,
@@ -78,8 +82,9 @@ export default function EventManagerSection({ events: propEvents, setEvents: pro
     status: 'confirmed'
   });
 
-  // Toast
+  // Toast & File Input Ref
   const [toast, setToast] = useState({ visible: false, message: '' });
+  const csvFileInputRef = useRef(null);
 
   const showToast = (message) => {
     setToast({ visible: true, message });
@@ -346,7 +351,175 @@ export default function EventManagerSection({ events: propEvents, setEvents: pro
     showToast('신청자가 명단에 등록되었습니다.');
   };
 
-  // Export Applicants to CSV
+  // Copy Notion-Formatted Event Report (클립보드 복사 후 노션에 Ctrl+V)
+  const handleCopyNotionReport = (event) => {
+    const apps = event.applications || [];
+    const totalApps = apps.length;
+    const checkedIn = apps.filter(a => a.check_in_status === 'checked_in').length;
+    const notCheckedIn = totalApps - checkedIn;
+    const rate = totalApps > 0 ? Math.round((checkedIn / totalApps) * 100) : 0;
+    const deposited = apps.filter(a => a.payment_status === 'deposited').length;
+    const waiting = totalApps - deposited;
+    const allergiesList = apps.filter(a => a.allergies && a.allergies !== '없음');
+
+    const dateStr = event.start_date
+      ? new Date(event.start_date).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' }) +
+        (event.end_date && event.end_date !== event.start_date
+          ? ' ~ ' + new Date(event.end_date).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' })
+          : '')
+      : '일정 미정';
+
+    const lines = [];
+    lines.push(`# 🎪 [행사 결과 보고] ${event.title}`);
+    lines.push(`> 📅 **일시:** ${dateStr} | 📍 **장소:** ${event.location || '미정'}`);
+    lines.push(`> 📊 **참석 현황:** 참석률 **${rate}%** (총 ${totalApps}명 중 **${checkedIn}명 출석** / ${notCheckedIn}명 미출석)`);
+    lines.push(`> 💳 **회비 납부:** 입금완료 ${deposited}명 / 미납·입금대기 ${waiting}명`);
+    if (event.contact_info) lines.push(`> 📞 **행사 담당 문의:** ${event.contact_info}`);
+    lines.push('');
+
+    if (allergiesList.length > 0) {
+      lines.push(`### ⚠️ 건강 주의 및 알레르기 관리 대상 (${allergiesList.length}명)`);
+      allergiesList.forEach(a => {
+        lines.push(`- **${a.student_name}** (${a.department || ''} ${a.grade || ''}) : 🚨 ${a.allergies}${a.health_notes ? ` | 특이사항: ${a.health_notes}` : ''} (보호자: ${a.parent_name || ''} ${a.parent_phone || ''})`);
+      });
+      lines.push('');
+    }
+
+    lines.push('### 📋 참가 신청자 전체 출석 및 납부 명단');
+    lines.push('| 번호 | 학생명 | 성별 | 학년/부서 | 출석 여부 | 회비 상태 | 보호자 연락처 |');
+    lines.push('| :---: | :---: | :---: | :---: | :---: | :---: | :---: |');
+    apps.forEach((a, idx) => {
+      const isAttended = a.check_in_status === 'checked_in' ? '✅ 출석' : '⏳ 미출석';
+      const pay = a.payment_status === 'deposited' ? '입금완료' : '입금대기';
+      const gender = a.gender === 'female' ? '여' : '남';
+      const deptGrade = [a.department, a.grade].filter(Boolean).join(' ') || '-';
+      lines.push(`| ${idx + 1} | **${a.student_name}** | ${gender} | ${deptGrade} | ${isAttended} | ${pay} | ${a.parent_phone || '-'} |`);
+    });
+    lines.push('');
+    lines.push(`*생성 일시: ${new Date().toLocaleString('ko-KR')} | Ministry Second Brain*`);
+
+    navigator.clipboard.writeText(lines.join('\n'));
+    setMenuOpenId(null);
+    showToast(`'${event.title}' 노션 행사 보고서가 복사되었습니다! 노션에 Ctrl+V 하세요.`);
+  };
+
+  // CSV Applicant Parser (Google Forms, Tally, Excel 호환)
+  const parseApplicantCsv = (csvText) => {
+    const clean = csvText.replace(/^\uFEFF/, '').trim();
+    if (!clean) return [];
+
+    const parseLine = (line) => {
+      const result = [];
+      let cur = '';
+      let inQuotes = false;
+      for (let i = 0; i < line.length; i++) {
+        const c = line[i];
+        if (c === '"') {
+          if (inQuotes && line[i + 1] === '"') {
+            cur += '"';
+            i++;
+          } else {
+            inQuotes = !inQuotes;
+          }
+        } else if (c === ',' && !inQuotes) {
+          result.push(cur.trim());
+          cur = '';
+        } else {
+          cur += c;
+        }
+      }
+      result.push(cur.trim());
+      return result;
+    };
+
+    const rawLines = clean.split(/\r?\n/).filter(l => l.trim().length > 0);
+    if (rawLines.length < 2) return [];
+
+    const headers = parseLine(rawLines[0]).map(h => h.replace(/^["']|["']$/g, '').trim().toLowerCase());
+
+    const findCol = (...keywords) => {
+      return headers.findIndex(h => keywords.some(k => h.includes(k)));
+    };
+
+    const colName = findCol('학생', '이름', '성명', '참가자', 'name');
+    const colGender = findCol('성별', 'gender', '남/여');
+    const colGrade = findCol('학년', 'grade', '연령', '나이');
+    const colDept = findCol('부서', '반', '소속', 'department');
+    const colBirth = findCol('생년', '생일', 'birth');
+    const colParentName = findCol('학부모', '보호자', '부모', 'parent');
+    const colPhone = findCol('연락처', '전화', '핸드폰', '휴대폰', 'phone');
+    const colEmergency = findCol('비상', '긴급', 'emergency');
+    const colAllergies = findCol('알레르기', '알러지', 'allergy');
+    const colHealth = findCol('건강', '지병', '특이사항', '메모', 'health');
+
+    const applicants = [];
+    for (let i = 1; i < rawLines.length; i++) {
+      const cols = parseLine(rawLines[i]);
+      const studentName = colName !== -1 ? cols[colName] : cols[0];
+      if (!studentName || studentName.trim() === '') continue;
+
+      const rawGender = colGender !== -1 ? (cols[colGender] || '') : '';
+      const isFemale = rawGender.includes('여') || rawGender.toLowerCase().includes('female');
+
+      applicants.push({
+        id: `app-csv-${Date.now()}-${i}-${Math.random().toString(36).substr(2, 4)}`,
+        student_name: studentName.replace(/^["']|["']$/g, ''),
+        gender: isFemale ? 'female' : 'male',
+        grade: colGrade !== -1 ? (cols[colGrade]?.replace(/^["']|["']$/g, '') || '') : '',
+        department: colDept !== -1 ? (cols[colDept]?.replace(/^["']|["']$/g, '') || '') : '',
+        birth_date: colBirth !== -1 ? (cols[colBirth]?.replace(/^["']|["']$/g, '') || '') : '',
+        parent_name: colParentName !== -1 ? (cols[colParentName]?.replace(/^["']|["']$/g, '') || '') : '',
+        parent_phone: colPhone !== -1 ? (cols[colPhone]?.replace(/^["']|["']$/g, '') || '') : '',
+        emergency_phone: colEmergency !== -1 ? (cols[colEmergency]?.replace(/^["']|["']$/g, '') || '') : '',
+        allergies: colAllergies !== -1 ? (cols[colAllergies]?.replace(/^["']|["']$/g, '') || '') : '',
+        health_notes: colHealth !== -1 ? (cols[colHealth]?.replace(/^["']|["']$/g, '') || '') : '',
+        privacy_consent: true,
+        photo_consent: true,
+        payment_status: 'deposited',
+        status: 'confirmed',
+        check_in_status: 'not_checked_in',
+        check_in_at: null,
+        custom_responses: {},
+        created_at: new Date().toISOString()
+      });
+    }
+
+    return applicants;
+  };
+
+  // CSV File Upload Handler
+  const handleCsvFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !appsModalEvent) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const text = event.target.result;
+        const parsed = parseApplicantCsv(text);
+        if (parsed.length === 0) {
+          alert('CSV 파일에서 유효한 신청자 명단을 찾을 수 없습니다. 열 이름(이름, 연락처, 학년 등)을 확인해주세요.');
+          return;
+        }
+
+        setEvents(events.map(ev => {
+          if (ev.id !== appsModalEvent.id) return ev;
+          return {
+            ...ev,
+            applications: [...parsed, ...(ev.applications || [])]
+          };
+        }));
+        showToast(`🎉 ${parsed.length}명의 신청자 명단을 성공적으로 불러왔습니다!`);
+      } catch (err) {
+        console.error(err);
+        alert('CSV 파일을 분석하는 중 오류가 발생했습니다.');
+      }
+    };
+    reader.readAsText(file, 'utf-8');
+    e.target.value = '';
+  };
+
+  // Export Applicants to CSV (Notion DB 호환 포맷 + UTF-8 BOM)
   const handleExportCSV = (event) => {
     const apps = event.applications || [];
     if (apps.length === 0) {
@@ -361,17 +534,17 @@ export default function EventManagerSection({ events: propEvents, setEvents: pro
     ];
 
     const rows = apps.map(a => [
-      `"${a.student_name || ''}"`,
+      `"${(a.student_name || '').replace(/"/g, '""')}"`,
       `"${a.gender === 'female' ? '여' : '남'}"`,
-      `"${a.grade || ''}"`,
-      `"${a.department || ''}"`,
-      `"${a.birth_date || ''}"`,
-      `"${a.parent_name || ''}"`,
-      `"${a.parent_phone || ''}"`,
-      `"${a.emergency_phone || ''}"`,
-      `"${a.health_notes || ''}"`,
-      `"${a.allergies || ''}"`,
-      `"${a.payment_status || ''}"`,
+      `"${(a.grade || '').replace(/"/g, '""')}"`,
+      `"${(a.department || '').replace(/"/g, '""')}"`,
+      `"${(a.birth_date || '').replace(/"/g, '""')}"`,
+      `"${(a.parent_name || '').replace(/"/g, '""')}"`,
+      `"${(a.parent_phone || '').replace(/"/g, '""')}"`,
+      `"${(a.emergency_phone || '').replace(/"/g, '""')}"`,
+      `"${(a.health_notes || '').replace(/"/g, '""')}"`,
+      `"${(a.allergies || '').replace(/"/g, '""')}"`,
+      `"${a.payment_status === 'deposited' ? '입금완료' : '입금대기'}"`,
       `"${APPLICATION_STATUS_CONFIG[a.status]?.label || a.status}"`,
       `"${a.check_in_status === 'checked_in' ? '출석' : '미출석'}"`,
       `"${a.check_in_at ? new Date(a.check_in_at).toLocaleString('ko-KR') : ''}"`,
@@ -386,7 +559,7 @@ export default function EventManagerSection({ events: propEvents, setEvents: pro
     link.download = `${event.title}_신청자명단_${new Date().toISOString().slice(0, 10)}.csv`;
     link.click();
     URL.revokeObjectURL(url);
-    showToast('엑셀(CSV) 다운로드가 완료되었습니다.');
+    showToast('노션 DB 호환 엑셀(CSV) 다운로드가 완료되었습니다.');
   };
 
   return (
@@ -424,6 +597,23 @@ export default function EventManagerSection({ events: propEvents, setEvents: pro
             <span className="stat-label">현장 체크인</span>
             <span className="stat-val accent">{checkedInCount}명</span>
           </div>
+        </div>
+      </div>
+
+      {/* Privacy & Notion Bridge Reassurance Card */}
+      <div className="event-privacy-bridge-card">
+        <div className="bridge-icon-wrap">
+          <ShieldCheck size={22} className="bridge-shield-icon" />
+        </div>
+        <div className="bridge-text-wrap">
+          <div className="bridge-title-row">
+            <h4>개인정보 완벽 보호 로컬 모드 & 노션 템플릿 연동</h4>
+            <span className="badge-local-secure">🔒 100% 브라우저 로컬 저장 (서버 전송 없음)</span>
+          </div>
+          <p>
+            등록된 모든 행사와 참가자 개인정보(이름, 연락처, 비상망, 알레르기)는 외부 서버로 전송되지 않고 <strong>담당자의 브라우저(기기)에만 안전하게 보관</strong>됩니다.
+            사역 보고나 데이터 보관이 필요할 땐 <strong>[📋 노션 보고서 복사]</strong>와 <strong>[📥 노션 DB 호환 CSV]</strong>로 내 노션 템플릿에 손쉽게 붙여넣으세요!
+          </p>
         </div>
       </div>
 
@@ -500,6 +690,10 @@ export default function EventManagerSection({ events: propEvents, setEvents: pro
 
                       {menuOpenId === event.id && (
                         <div className="event-dropdown-menu">
+                          <button onClick={() => handleCopyNotionReport(event)}>
+                            <ClipboardCheck size={14} />
+                            <span>노션 보고서 복사</span>
+                          </button>
                           <button onClick={() => handleCopyKakaoInvite(event)}>
                             <Copy size={14} />
                             <span>카톡 초대문 복사</span>
@@ -514,7 +708,7 @@ export default function EventManagerSection({ events: propEvents, setEvents: pro
                           </button>
                           <button onClick={() => handleExportCSV(event)}>
                             <Download size={14} />
-                            <span>신청자 엑셀 다운</span>
+                            <span>노션 DB CSV 다운</span>
                           </button>
                           <div className="menu-divider" />
                           <button onClick={() => handleDeleteEvent(event.id)} className="menu-delete">
@@ -589,12 +783,21 @@ export default function EventManagerSection({ events: propEvents, setEvents: pro
                   {/* Bottom Action Buttons */}
                   <div className="event-card-footer">
                     <button
+                      onClick={() => handleCopyNotionReport(event)}
+                      className="btn-card-notion"
+                      title="출석 통계 및 요약 보고서를 노션 마크다운으로 복사"
+                    >
+                      <ClipboardCheck size={13} />
+                      <span>노션 보고서</span>
+                    </button>
+
+                    <button
                       onClick={() => handleCopyKakaoInvite(event)}
                       className="btn-card-secondary"
                       title="학부모 카카오톡 초대 메시지 생성 및 복사"
                     >
                       <Send size={13} />
-                      <span>카톡 초대문</span>
+                      <span>카톡 초대</span>
                     </button>
 
                     <button
@@ -602,7 +805,7 @@ export default function EventManagerSection({ events: propEvents, setEvents: pro
                       className="btn-card-primary"
                     >
                       <Users size={13} />
-                      <span>신청자 명단 ({apps.length})</span>
+                      <span>명단 / 체크인 ({apps.length})</span>
                     </button>
                   </div>
                 </div>
@@ -789,10 +992,33 @@ export default function EventManagerSection({ events: propEvents, setEvents: pro
               </div>
 
               <div className="apps-modal-head-actions">
+                <input
+                  type="file"
+                  ref={csvFileInputRef}
+                  onChange={handleCsvFileChange}
+                  accept=".csv"
+                  style={{ display: 'none' }}
+                />
+                <button
+                  onClick={() => csvFileInputRef.current?.click()}
+                  className="btn-head-action secondary"
+                  title="구글 폼 또는 엑셀에서 내려받은 신청자 CSV 명단 자동 일괄 등록"
+                >
+                  <Upload size={14} />
+                  <span>CSV 명단 가져오기</span>
+                </button>
+                <button
+                  onClick={() => handleCopyNotionReport(appsModalEvent)}
+                  className="btn-head-action secondary"
+                  title="참석률, 입금현황, 알레르기 요약 보고서를 노션 서식(Callout, Table)으로 복사"
+                >
+                  <ClipboardCheck size={14} />
+                  <span>노션 보고서 복사</span>
+                </button>
                 <button
                   onClick={() => handleExportCSV(appsModalEvent)}
                   className="btn-head-action"
-                  title="엑셀(CSV) 다운로드"
+                  title="노션 DB 호환 엑셀(CSV) 다운로드"
                 >
                   <Download size={14} />
                   <span>CSV 내보내기</span>
