@@ -15,7 +15,9 @@ import Ambient3DBackground from './components/Ambient3DBackground';
 import UserGuidePage from './components/UserGuidePage';
 import NoticeWriterSection from './components/NoticeWriterSection';
 import EventManagerSection from './components/EventManagerSection';
+import DashboardHome from './components/DashboardHome';
 import { INITIAL_DATA } from './data/defaultData';
+import { DEFAULT_EVENTS } from './data/defaultEvents';
 import { Layers, CheckCircle2, BookOpen, Archive as ArchiveIcon, LayoutDashboard, Sparkles, Package, MessageSquareText, CalendarDays } from 'lucide-react';
 import './App.css';
 
@@ -140,6 +142,21 @@ export default function App() {
     }
     return INITIAL_DATA;
   });
+
+  // Events data state
+  const [events, setEvents] = useState(() => {
+    try {
+      const saved = localStorage.getItem('ministry_second_brain_events_v2');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.error('Failed to parse events:', e);
+    }
+    return DEFAULT_EVENTS;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('ministry_second_brain_events_v2', JSON.stringify(events));
+  }, [events]);
 
   // CSV 내보내기 모드: true면 '신규·수정 항목만' 내보낸다 (중복 병합 방지)
   const [csvOnlyNew, setCsvOnlyNew] = useState(() => {
@@ -425,179 +442,146 @@ export default function App() {
           onOpenPresetModal={() => setPresetModalOpen(true)}
         />
 
-        {/* Tab Navigation */}
-        <nav className="tab-navigation">
-          <button
-            onClick={() => setActiveTab('dashboard')}
-            className={`nav-tab-btn ${activeTab === 'dashboard' ? 'active' : ''}`}
-          >
-            <LayoutDashboard size={15} />
-            <span>통합 개요</span>
-          </button>
+        {/* Categorized Modern Navigation Bar */}
+        <nav className="tab-navigation-bar">
+          <div className="tab-nav-group main">
+            <button
+              onClick={() => setActiveTab('dashboard')}
+              className={`nav-tab-btn dashboard ${activeTab === 'dashboard' ? 'active' : ''}`}
+            >
+              <LayoutDashboard size={15} />
+              <span>대시보드 (홈)</span>
+            </button>
+          </div>
 
-          <button
-            onClick={() => setActiveTab('projects')}
-            className={`nav-tab-btn project ${activeTab === 'projects' ? 'active' : ''}`}
-          >
-            <span className="tab-badge-letter p-badge">P</span>
-            <span>프로젝트 ({data.projects.length})</span>
-          </button>
+          <div className="tab-nav-divider" />
 
-          <button
-            onClick={() => setActiveTab('areas')}
-            className={`nav-tab-btn area ${activeTab === 'areas' ? 'active' : ''}`}
-          >
-            <span className="tab-badge-letter a-badge">A</span>
-            <span>책임 영역 ({data.areas.length})</span>
-          </button>
+          {/* Group: 교회학교 & 사역 툴 */}
+          <div className="tab-nav-group tools">
+            <span className="tab-group-caption">스마트 툴</span>
+            <button
+              onClick={() => setActiveTab('notice-writer')}
+              className={`nav-tab-btn notice-tab ${activeTab === 'notice-writer' ? 'active' : ''}`}
+            >
+              <MessageSquareText size={15} />
+              <span>공지문 작성기</span>
+              <span className="nav-tag-badge hot">NEW</span>
+            </button>
 
-          <button
-            onClick={() => setActiveTab('resources')}
-            className={`nav-tab-btn resource ${activeTab === 'resources' ? 'active' : ''}`}
-          >
-            <span className="tab-badge-letter r-badge">R</span>
-            <span>지식 창고 ({data.resources.length})</span>
-          </button>
+            <button
+              onClick={() => setActiveTab('events')}
+              className={`nav-tab-btn event-tab ${activeTab === 'events' ? 'active' : ''}`}
+            >
+              <CalendarDays size={15} />
+              <span>행사 관리</span>
+              <span className="nav-tag-badge hot">NEW</span>
+            </button>
+          </div>
 
-          <button
-            onClick={() => setActiveTab('archives')}
-            className={`nav-tab-btn archive ${activeTab === 'archives' ? 'active' : ''}`}
-          >
-            <span className="tab-badge-letter arch-badge">A</span>
-            <span>보관함 ({data.archives.length})</span>
-          </button>
+          <div className="tab-nav-divider" />
 
-          <button
-            onClick={() => setActiveTab('notice-writer')}
-            className={`nav-tab-btn notice-tab ${activeTab === 'notice-writer' ? 'active' : ''}`}
-          >
-            <span className="tab-badge-letter n-badge">N</span>
-            <span>공지문 작성기</span>
-          </button>
+          {/* Group: 목회 Second Brain PARA */}
+          <div className="tab-nav-group para">
+            <span className="tab-group-caption">Second Brain (PARA)</span>
+            <button
+              onClick={() => setActiveTab('projects')}
+              className={`nav-tab-btn project ${activeTab === 'projects' ? 'active' : ''}`}
+            >
+              <span className="tab-badge-letter p-badge">P</span>
+              <span>프로젝트 ({data.projects.length})</span>
+            </button>
 
-          <button
-            onClick={() => setActiveTab('events')}
-            className={`nav-tab-btn event-tab ${activeTab === 'events' ? 'active' : ''}`}
-          >
-            <span className="tab-badge-letter e-badge">E</span>
-            <span>행사 관리</span>
-          </button>
+            <button
+              onClick={() => setActiveTab('areas')}
+              className={`nav-tab-btn area ${activeTab === 'areas' ? 'active' : ''}`}
+            >
+              <span className="tab-badge-letter a-badge">A</span>
+              <span>책임 영역 ({data.areas.length})</span>
+            </button>
 
-          <button
-            onClick={() => setActiveTab('guide')}
-            className={`nav-tab-btn guide-nav-tab ${activeTab === 'guide' ? 'active' : ''}`}
-          >
-            <BookOpen size={15} />
-            <span>활용 가이드</span>
-          </button>
+            <button
+              onClick={() => setActiveTab('resources')}
+              className={`nav-tab-btn resource ${activeTab === 'resources' ? 'active' : ''}`}
+            >
+              <span className="tab-badge-letter r-badge">R</span>
+              <span>지식 창고 ({data.resources.length})</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('archives')}
+              className={`nav-tab-btn archive ${activeTab === 'archives' ? 'active' : ''}`}
+            >
+              <span className="tab-badge-letter arch-badge">A</span>
+              <span>보관함 ({data.archives.length})</span>
+            </button>
+          </div>
+
+          <div className="tab-nav-divider" />
+
+          <div className="tab-nav-group guide">
+            <button
+              onClick={() => setActiveTab('guide')}
+              className={`nav-tab-btn guide-nav-tab ${activeTab === 'guide' ? 'active' : ''}`}
+            >
+              <BookOpen size={15} />
+              <span>활용 가이드</span>
+            </button>
+          </div>
         </nav>
 
-        {/* Tab: Dashboard View */}
-        {activeTab === 'dashboard' && (
-          <div className="dashboard-view fade-in">
-            {/* AI Assistant Generator */}
-            <div ref={assistantRef}>
-              <SmartAIAssistant
-                areas={data.areas}
-                onAddGeneratedItem={(type, item) => handleSaveItem(type, item)}
-              />
+        {/* PARA Sub-navigation Header when browsing PARA components */}
+        {['projects', 'areas', 'resources', 'archives'].includes(activeTab) && (
+          <div className="para-subnav-banner fade-in">
+            <div className="para-subnav-left">
+              <span className="para-subnav-title">Second Brain (PARA) 지식 관리 시스템</span>
+              <span className="para-subnav-desc">목회 사역과 지식을 4단계(Projects, Areas, Resources, Archives)로 정리합니다.</span>
             </div>
-
-            {/* Quick Presets Highlight Banner */}
-            <div className="dashboard-preset-banner">
-              <div className="preset-banner-info">
-                <span className="preset-tag-pill">Starter Collection</span>
-                <h3>목회 현장에서 바로 활용하는 사역 템플릿 컬렉션</h3>
-                <p>로마서 8주 강해 설교 시리즈, 여름 수련회 WBS 일정, 새가족 4주 정착 시스템, 심방 위로 가이드</p>
-              </div>
+            <div className="para-subnav-pills">
               <button
-                onClick={() => setPresetModalOpen(true)}
-                className="btn-open-preset-library"
+                onClick={() => setActiveTab('projects')}
+                className={`para-pill ${activeTab === 'projects' ? 'active p-active' : ''}`}
               >
-                <Package size={14} />
-                <span>템플릿 컬렉션 열기</span>
+                <span className="tab-badge-letter p-badge">P</span>
+                <span>Projects ({data.projects.length})</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('areas')}
+                className={`para-pill ${activeTab === 'areas' ? 'active a-active' : ''}`}
+              >
+                <span className="tab-badge-letter a-badge">A</span>
+                <span>Areas ({data.areas.length})</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('resources')}
+                className={`para-pill ${activeTab === 'resources' ? 'active r-active' : ''}`}
+              >
+                <span className="tab-badge-letter r-badge">R</span>
+                <span>Resources ({data.resources.length})</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('archives')}
+                className={`para-pill ${activeTab === 'archives' ? 'active arch-active' : ''}`}
+              >
+                <span className="tab-badge-letter arch-badge">A</span>
+                <span>Archives ({data.archives.length})</span>
               </button>
             </div>
-
-            {/* Quick Ministry Tools Highlight Grid */}
-            <div className="dashboard-ministry-tools-grid">
-              <div
-                className="ministry-tool-card notice"
-                onClick={() => setActiveTab('notice-writer')}
-              >
-                <div className="tool-card-icon notice">
-                  <MessageSquareText size={22} />
-                </div>
-                <div className="tool-card-text">
-                  <h4>AI 교회학교 공지문 작성기</h4>
-                  <p>상황·대상·말투 선택으로 4종 공지문 즉시 완성 & 카카오톡 원클릭 발송</p>
-                </div>
-                <span className="tool-card-arrow">바로가기 →</span>
-              </div>
-
-              <div
-                className="ministry-tool-card event"
-                onClick={() => setActiveTab('events')}
-              >
-                <div className="tool-card-icon event">
-                  <CalendarDays size={22} />
-                </div>
-                <div className="tool-card-text">
-                  <h4>행사 관리 & 참가자 접수</h4>
-                  <p>여름성경학교·수련회 등록 현황, 학부모 초대문 복사 및 현장 체크인</p>
-                </div>
-                <span className="tool-card-arrow">바로가기 →</span>
-              </div>
-            </div>
-
-            {/* Projects Overview */}
-            <div className="dashboard-section-block">
-              <ProjectSection
-                projects={data.projects}
-                areas={data.areas}
-                onAddProject={() => handleOpenNew('Project')}
-                onUpdateProject={(p) => handleSaveItem('Project', p)}
-                onDeleteProject={(id) => handleDeleteItem('projects', id)}
-                onToggleWbs={handleToggleWbs}
-                onOpenDetail={handleOpenDetail}
-                csvOnlyNew={csvOnlyNew}
-                onCsvExported={handleCsvExported}
-              />
-            </div>
-
-            {/* Areas Overview */}
-            <div className="dashboard-section-block">
-              <AreaSection
-                areas={data.areas}
-                projects={data.projects}
-                resources={data.resources}
-                onOpenDetail={handleOpenDetail}
-              />
-            </div>
-
-            {/* Resources Overview */}
-            <div className="dashboard-section-block">
-              <ResourceSection
-                resources={data.resources}
-                onAddResource={() => handleOpenNew('Resource')}
-                onDeleteResource={(id) => handleDeleteItem('resources', id)}
-                onOpenDetail={handleOpenDetail}
-                csvOnlyNew={csvOnlyNew}
-                onCsvExported={handleCsvExported}
-              />
-            </div>
-
-            {/* Archives Overview */}
-            <div className="dashboard-section-block">
-              <ArchiveSection
-                archives={data.archives}
-                areas={data.areas}
-                onAddArchive={() => handleOpenNew('Archive')}
-                onDeleteArchive={(id) => handleDeleteItem('archives', id)}
-                onOpenDetail={handleOpenDetail}
-              />
-            </div>
           </div>
+        )}
+
+        {/* Tab: Dashboard Command Center */}
+        {activeTab === 'dashboard' && (
+          <DashboardHome
+            data={data}
+            events={events}
+            onNavigateTab={setActiveTab}
+            onOpenNew={handleOpenNew}
+            onOpenDetail={handleOpenDetail}
+            onToggleWbs={handleToggleWbs}
+            onOpenPresetModal={() => setPresetModalOpen(true)}
+            onSaveItem={handleSaveItem}
+            assistantRef={assistantRef}
+          />
         )}
 
         {/* Tab: Projects Only */}
@@ -668,7 +652,10 @@ export default function App() {
         {/* Tab: Event Manager */}
         {activeTab === 'events' && (
           <div className="fade-in">
-            <EventManagerSection />
+            <EventManagerSection
+              events={events}
+              setEvents={setEvents}
+            />
           </div>
         )}
 

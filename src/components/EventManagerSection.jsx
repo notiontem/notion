@@ -35,8 +35,8 @@ import {
 
 const EVENTS_STORAGE_KEY = 'ministry_second_brain_events_v2';
 
-export default function EventManagerSection() {
-  const [events, setEvents] = useState(() => {
+export default function EventManagerSection({ events: propEvents, setEvents: propSetEvents }) {
+  const [internalEvents, setInternalEvents] = useState(() => {
     try {
       const saved = localStorage.getItem(EVENTS_STORAGE_KEY);
       if (saved) return JSON.parse(saved);
@@ -45,6 +45,9 @@ export default function EventManagerSection() {
     }
     return DEFAULT_EVENTS;
   });
+
+  const events = propEvents || internalEvents;
+  const setEvents = propSetEvents || setInternalEvents;
 
   const [activeTab, setActiveTab] = useState('list'); // 'list' | 'templates'
   const [menuOpenId, setMenuOpenId] = useState(null);
