@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Header from './components/Header';
 import NotionBanner from './components/NotionBanner';
 import SmartAIAssistant from './components/SmartAIAssistant';
@@ -18,7 +18,7 @@ import EventManagerSection from './components/EventManagerSection';
 import DashboardHome from './components/DashboardHome';
 import { INITIAL_DATA } from './data/defaultData';
 import { DEFAULT_EVENTS } from './data/defaultEvents';
-import { Layers, CheckCircle2, BookOpen, Archive as ArchiveIcon, LayoutDashboard, Sparkles, Package, MessageSquareText, CalendarDays } from 'lucide-react';
+import { Layers, CheckCircle2, BookOpen, Archive as ArchiveIcon, LayoutDashboard, Sparkles, Package, MessageSquareText, CalendarDays, ChevronDown, Check } from 'lucide-react';
 import './App.css';
 
 const STORAGE_KEY = 'ministry_second_brain_data_v1';
@@ -167,8 +167,31 @@ export default function App() {
     localStorage.setItem(CSV_NEW_ONLY_KEY, csvOnlyNew ? '1' : '0');
   }, [csvOnlyNew]);
 
-  // Active Tab: 'dashboard' | 'projects' | 'areas' | 'resources' | 'archives' | 'guide'
+  // Active Tab: 'dashboard' | 'projects' | 'areas' | 'resources' | 'archives' | 'guide' | 'notice-writer' | 'events'
   const [activeTab, setActiveTab] = useState('dashboard');
+
+  // Second Brain Dropdown Menu
+  const [paraMenuOpen, setParaMenuOpen] = useState(false);
+  const paraMenuRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (paraMenuRef.current && !paraMenuRef.current.contains(e.target)) {
+        setParaMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const isParaActive = ['projects', 'areas', 'resources', 'archives'].includes(activeTab);
+  const paraItemMap = {
+    projects: { label: '프로젝트', letter: 'P', badgeClass: 'p-badge' },
+    areas: { label: '책임 영역', letter: 'A', badgeClass: 'a-badge' },
+    resources: { label: '지식 창고', letter: 'R', badgeClass: 'r-badge' },
+    archives: { label: '보관함', letter: 'A', badgeClass: 'arch-badge' }
+  };
+  const activeParaItem = paraItemMap[activeTab];
 
   // Modals state
   const [guideModalOpen, setGuideModalOpen] = useState(false);
@@ -442,25 +465,23 @@ export default function App() {
           onOpenPresetModal={() => setPresetModalOpen(true)}
         />
 
-        {/* Categorized Modern Navigation Bar */}
+        {/* Categorized Modern Navigation Bar - Fits at a Glance Without Horizontal Scroll */}
         <nav className="tab-navigation-bar">
-          <div className="tab-nav-group main">
+          <div className="tab-nav-left-cluster">
+            {/* 1. Dashboard / Home */}
             <button
-              onClick={() => setActiveTab('dashboard')}
+              onClick={() => { setActiveTab('dashboard'); setParaMenuOpen(false); }}
               className={`nav-tab-btn dashboard ${activeTab === 'dashboard' ? 'active' : ''}`}
             >
               <LayoutDashboard size={15} />
-              <span>대시보드 (홈)</span>
+              <span>대시보드</span>
             </button>
-          </div>
 
-          <div className="tab-nav-divider" />
+            <div className="tab-nav-divider" />
 
-          {/* Group: 교회학교 & 사역 툴 */}
-          <div className="tab-nav-group tools">
-            <span className="tab-group-caption">스마트 툴</span>
+            {/* 2. Notice Writer */}
             <button
-              onClick={() => setActiveTab('notice-writer')}
+              onClick={() => { setActiveTab('notice-writer'); setParaMenuOpen(false); }}
               className={`nav-tab-btn notice-tab ${activeTab === 'notice-writer' ? 'active' : ''}`}
             >
               <MessageSquareText size={15} />
@@ -468,59 +489,100 @@ export default function App() {
               <span className="nav-tag-badge hot">NEW</span>
             </button>
 
+            {/* 3. Event Manager */}
             <button
-              onClick={() => setActiveTab('events')}
+              onClick={() => { setActiveTab('events'); setParaMenuOpen(false); }}
               className={`nav-tab-btn event-tab ${activeTab === 'events' ? 'active' : ''}`}
             >
               <CalendarDays size={15} />
               <span>행사 관리</span>
               <span className="nav-tag-badge hot">NEW</span>
             </button>
+
+            <div className="tab-nav-divider" />
+
+            {/* 4. Second Brain (PARA) Dropdown Hub */}
+            <div className="para-dropdown-wrap" ref={paraMenuRef}>
+              <button
+                onClick={() => setParaMenuOpen(!paraMenuOpen)}
+                className={`nav-tab-btn para-main-btn ${isParaActive ? 'active' : ''}`}
+                title="프로젝트, 책임 영역, 지식 창고, 보관함 (PARA) 메뉴 열기"
+              >
+                {activeParaItem ? (
+                  <span className={`tab-badge-letter ${activeParaItem.badgeClass}`}>
+                    {activeParaItem.letter}
+                  </span>
+                ) : (
+                  <Layers size={15} />
+                )}
+                <span>Second Brain</span>
+                {activeParaItem && <span className="active-para-label">({activeParaItem.label})</span>}
+                <ChevronDown size={13} className={`chevron-arrow ${paraMenuOpen ? 'open' : ''}`} />
+              </button>
+
+              {paraMenuOpen && (
+                <div className="para-dropdown-menu fade-in">
+                  <div className="para-dropdown-header">
+                    <span className="para-dropdown-tag">PARA 지식 관리</span>
+                    <p>목회 과제와 지식 데이터베이스</p>
+                  </div>
+
+                  <button
+                    onClick={() => { setActiveTab('projects'); setParaMenuOpen(false); }}
+                    className={`para-menu-item ${activeTab === 'projects' ? 'selected' : ''}`}
+                  >
+                    <span className="item-letter p">P</span>
+                    <div className="item-text">
+                      <strong>Projects (사역 프로젝트)</strong>
+                      <small>사역 일정, 수련회 WBS 태스크 ({data.projects.length}개)</small>
+                    </div>
+                    {activeTab === 'projects' && <Check size={14} className="check-icon" />}
+                  </button>
+
+                  <button
+                    onClick={() => { setActiveTab('areas'); setParaMenuOpen(false); }}
+                    className={`para-menu-item ${activeTab === 'areas' ? 'selected' : ''}`}
+                  >
+                    <span className="item-letter a">A</span>
+                    <div className="item-text">
+                      <strong>Areas (책임 영역)</strong>
+                      <small>예배·교육·행정 5대 사역 균형 ({data.areas.length}개)</small>
+                    </div>
+                    {activeTab === 'areas' && <Check size={14} className="check-icon" />}
+                  </button>
+
+                  <button
+                    onClick={() => { setActiveTab('resources'); setParaMenuOpen(false); }}
+                    className={`para-menu-item ${activeTab === 'resources' ? 'selected' : ''}`}
+                  >
+                    <span className="item-letter r">R</span>
+                    <div className="item-text">
+                      <strong>Resources (지식 창고)</strong>
+                      <small>설교 자료, 공과 교재, 행정 서식 ({data.resources.length}개)</small>
+                    </div>
+                    {activeTab === 'resources' && <Check size={14} className="check-icon" />}
+                  </button>
+
+                  <button
+                    onClick={() => { setActiveTab('archives'); setParaMenuOpen(false); }}
+                    className={`para-menu-item ${activeTab === 'archives' ? 'selected' : ''}`}
+                  >
+                    <span className="item-letter arch">A</span>
+                    <div className="item-text">
+                      <strong>Archives (완료 보관함)</strong>
+                      <small>완료된 사역 기록 및 지난 자료 ({data.archives.length}개)</small>
+                    </div>
+                    {activeTab === 'archives' && <Check size={14} className="check-icon" />}
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
-          <div className="tab-nav-divider" />
-
-          {/* Group: 목회 Second Brain PARA */}
-          <div className="tab-nav-group para">
-            <span className="tab-group-caption">Second Brain (PARA)</span>
+          <div className="tab-nav-right-cluster">
+            {/* 5. Guide */}
             <button
-              onClick={() => setActiveTab('projects')}
-              className={`nav-tab-btn project ${activeTab === 'projects' ? 'active' : ''}`}
-            >
-              <span className="tab-badge-letter p-badge">P</span>
-              <span>프로젝트 ({data.projects.length})</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('areas')}
-              className={`nav-tab-btn area ${activeTab === 'areas' ? 'active' : ''}`}
-            >
-              <span className="tab-badge-letter a-badge">A</span>
-              <span>책임 영역 ({data.areas.length})</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('resources')}
-              className={`nav-tab-btn resource ${activeTab === 'resources' ? 'active' : ''}`}
-            >
-              <span className="tab-badge-letter r-badge">R</span>
-              <span>지식 창고 ({data.resources.length})</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('archives')}
-              className={`nav-tab-btn archive ${activeTab === 'archives' ? 'active' : ''}`}
-            >
-              <span className="tab-badge-letter arch-badge">A</span>
-              <span>보관함 ({data.archives.length})</span>
-            </button>
-          </div>
-
-          <div className="tab-nav-divider" />
-
-          <div className="tab-nav-group guide">
-            <button
-              onClick={() => setActiveTab('guide')}
+              onClick={() => { setActiveTab('guide'); setParaMenuOpen(false); }}
               className={`nav-tab-btn guide-nav-tab ${activeTab === 'guide' ? 'active' : ''}`}
             >
               <BookOpen size={15} />

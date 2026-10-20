@@ -594,43 +594,43 @@
 }
 
 /* ==========================================================================
-   4. Categorized Modern Navigation Bar
+   4. Categorized Modern Navigation Bar - Single Glance & Zero Scrollbar
    ========================================================================== */
 .tab-navigation-bar {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   background: var(--bg-surface);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
-  padding: 0.35rem 0.5rem;
+  padding: 0.35rem 0.65rem;
   margin-bottom: 1.75rem;
   box-shadow: var(--shadow-sm);
-  overflow-x: auto;
-  gap: 0.4rem;
+  overflow: visible; /* 가로 스크롤바 완전 제거 */
+  position: relative;
+  z-index: 40;
+  gap: 0.6rem;
+  flex-wrap: wrap;
 }
 
-.tab-nav-group {
+.tab-nav-left-cluster {
   display: flex;
   align-items: center;
-  gap: 0.3rem;
-  position: relative;
+  gap: 0.35rem;
+  flex-wrap: wrap;
 }
 
-.tab-group-caption {
-  font-size: 0.68rem;
-  font-weight: 700;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  padding: 0 0.4rem;
-  white-space: nowrap;
+.tab-nav-right-cluster {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 
 .tab-nav-divider {
   width: 1px;
-  height: 20px;
+  height: 18px;
   background: var(--border-subtle);
-  margin: 0 0.35rem;
+  margin: 0 0.25rem;
   flex-shrink: 0;
 }
 
@@ -675,6 +675,136 @@
 .nav-tab-btn.event-tab.active {
   background: rgba(139, 92, 246, 0.12);
   color: #8b5cf6;
+}
+
+.nav-tab-btn.para-main-btn.active {
+  background: var(--bg-subtle-hover);
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.active-para-label {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+}
+
+.chevron-arrow {
+  transition: transform 0.2s ease;
+  color: var(--text-muted);
+}
+
+.chevron-arrow.open {
+  transform: rotate(180deg);
+}
+
+/* Second Brain Dropdown Menu */
+.para-dropdown-wrap {
+  position: relative;
+}
+
+.para-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: 275px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  padding: 0.5rem;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  animation: dropdownFade 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes dropdownFade {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.para-dropdown-header {
+  padding: 0.5rem 0.65rem 0.4rem 0.65rem;
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: 0.25rem;
+}
+
+.para-dropdown-tag {
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #0284c7;
+  display: block;
+  margin-bottom: 0.1rem;
+}
+
+.para-dropdown-header p {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.para-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--radius-md);
+  background: transparent;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  width: 100%;
+}
+
+.para-menu-item:hover {
+  background: var(--bg-subtle);
+}
+
+.para-menu-item.selected {
+  background: var(--bg-hover);
+}
+
+.item-letter {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.item-letter.p { background: var(--project-light); color: var(--project-color); }
+.item-letter.a { background: var(--area-light); color: var(--area-color); }
+.item-letter.r { background: var(--resource-light); color: var(--resource-color); }
+.item-letter.arch { background: var(--archive-light); color: var(--archive-color); }
+
+.item-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.item-text strong {
+  font-size: 0.83rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.item-text small {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.check-icon {
+  color: #10b981;
+  flex-shrink: 0;
 }
 
 .nav-tag-badge.hot {
