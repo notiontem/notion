@@ -79,14 +79,14 @@ export default function OnboardingModal({
               </div>
               <h2 className="onboarding-title">노션 템플릿을 내 워크스페이스에 복제하세요</h2>
               <p className="onboarding-desc">
-                제공되는 <strong>Ministry Second Brain PARA</strong> 원본 템플릿을 개인 노션 계정에 복제(Duplicate)하셔야 
+                무료로 공유해 드리는 <strong>Ministry Second Brain PARA</strong> 원본 템플릿을 개인 노션 계정에 복제(Duplicate)하셔야 
                 자유롭게 사역 내용을 기록하고 편집하실 수 있습니다.
               </p>
 
               <div className="onboarding-card-box">
                 <div className="card-item">
                   <span className="bullet">1</span>
-                  <p>아래 <strong>[원본 노션 템플릿 열기]</strong>를 클릭하여 페이지로 이동합니다.</p>
+                  <p>아래 <strong>[무료 원본 노션 템플릿 열기]</strong>를 클릭하여 페이지로 이동합니다.</p>
                 </div>
                 <div className="card-item">
                   <span className="bullet">2</span>
@@ -105,7 +105,7 @@ export default function OnboardingModal({
                   rel="noopener noreferrer"
                   className="btn-primary-lg"
                 >
-                  <span>원본 노션 템플릿 열기</span>
+                  <span>무료 원본 노션 템플릿 열기</span>
                   <ExternalLink size={14} />
                 </a>
                 <button

@@ -862,7 +862,7 @@ export default function App() {
         onAddPresetToData={handleAddPresetToData}
       />
 
-      {/* Buyer Welcome Onboarding Modal */}
+      {/* Free Welcome Onboarding Modal */}
       <OnboardingModal
         isOpen={onboardingOpen}
         onClose={handleCloseOnboarding}

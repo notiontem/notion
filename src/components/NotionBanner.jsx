@@ -66,9 +66,9 @@ export default function NotionBanner({
                 <button
                   onClick={handleOpenOriginalTemplate}
                   className="btn-sleek-highlight"
-                  title="구매한 원본 템플릿 열기"
+                  title="무료 공유 템플릿 열기"
                 >
-                  <span>원본 템플릿 복제</span>
+                  <span>무료 템플릿 복제</span>
                   <ExternalLink size={13} />
                 </button>
               )}
@@ -100,8 +100,8 @@ export default function NotionBanner({
               <div className="sleek-step-card">
                 <span className="step-num">01</span>
                 <div className="step-content">
-                  <strong>원본 템플릿 복제</strong>
-                  <p>구매하신 공식 노션 템플릿을 본인의 워크스페이스에 [복제(Duplicate)]합니다.</p>
+                  <strong>무료 템플릿 복제</strong>
+                  <p>무료로 공유해 드리는 공식 노션 템플릿을 본인의 워크스페이스에 [복제(Duplicate)]합니다.</p>
                 </div>
               </div>
 

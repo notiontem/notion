@@ -20,13 +20,13 @@ export default function UserGuidePage({
       <div className="guide-hero">
         <div className="guide-hero-badge">
           <BookOpen size={14} />
-          <span>구매자 공식 활용 가이드북</span>
+          <span>사역자 공식 활용 가이드북 (100% 무료 나눔)</span>
         </div>
         <h1 className="guide-hero-title">
-          Ministry Second Brain PARA 템플릿 가이드
+          Ministry Second Brain PARA 무료 나눔 가이드
         </h1>
         <p className="guide-hero-desc">
-          구매하신 <strong>Ministry Second Brain PARA</strong> 노션 템플릿을 본인의 워크스페이스에 복제하고, 
+          무료로 공유해 드리는 <strong>Ministry Second Brain PARA</strong> 노션 템플릿을 본인의 워크스페이스에 복제하고, 
           이 웹 스튜디오를 통해 <strong>빈 데이터베이스를 가장 빠르고 체계적으로 채우는 실전 매뉴얼</strong>입니다.
         </p>
 
@@ -46,7 +46,7 @@ export default function UserGuidePage({
           <h2>템플릿 복제 및 기본 셋업 (3분 완성)</h2>
         </div>
         <p className="sec-intro-text">
-          구매하신 템플릿을 본인 계정으로 복제해야 나만의 사역 데이터베이스를 자유롭게 수정하고 채워 넣을 수 있습니다.
+          무료로 배포해 드리는 템플릿을 본인 계정으로 복제해야 나만의 사역 데이터베이스를 자유롭게 수정하고 채워 넣을 수 있습니다.
         </p>
 
         <div className="quickstart-steps-grid">

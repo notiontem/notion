@@ -1,5 +1,5 @@
 /**
- * Preset Ministry Library for Buyers of "Ministry Second Brain PARA"
+ * Preset Ministry Library for "Ministry Second Brain PARA" (Free Ministry Sharing Edition)
  * Ready-to-use high quality packs for instant Notion population.
  */
 

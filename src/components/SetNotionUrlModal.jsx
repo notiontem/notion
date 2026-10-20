@@ -84,7 +84,7 @@ export default function SetNotionUrlModal({
               </div>
               <h3 className="url-modal-heading">내 노션 워크스페이스 연결</h3>
               <p className="url-modal-desc">
-                구매하신 공식 템플릿을 내 노션에 복제한 후, 해당 페이지 주소를 연결합니다.
+                무료로 공유해 드리는 공식 템플릿을 내 노션에 복제한 후, 해당 페이지 주소를 연결합니다.
               </p>
             </div>
           </div>
@@ -135,7 +135,7 @@ export default function SetNotionUrlModal({
               <div className="url-step-content">
                 <div className="url-step-text-wrap">
                   <strong>공식 템플릿을 내 노션에 복제하셨나요?</strong>
-                  <p>아직 복제하지 않으셨다면 원본 페이지 우측 상단의 <strong>[복제(Duplicate)]</strong>를 먼저 실행하세요.</p>
+                  <p>아직 복제하지 않으셨다면 원본 페이지 우측 상단의 <strong>[복제(Duplicate)]</strong>를 먼저 실행하세요. (100% 무료 나눔)</p>
                 </div>
                 <a
                   href={DEFAULT_ORIGINAL_TEMPLATE}
@@ -143,7 +143,7 @@ export default function SetNotionUrlModal({
                   rel="noopener noreferrer"
                   className="btn-open-template"
                 >
-                  <span>공식 원본 템플릿 열기</span>
+                  <span>공식 템플릿 열기 (무료 복제)</span>
                   <ExternalLink size={12} />
                 </a>
               </div>
