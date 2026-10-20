@@ -13,8 +13,10 @@ import OnboardingModal from './components/OnboardingModal';
 import PresetLibraryModal from './components/PresetLibraryModal';
 import Ambient3DBackground from './components/Ambient3DBackground';
 import UserGuidePage from './components/UserGuidePage';
+import NoticeWriterSection from './components/NoticeWriterSection';
+import EventManagerSection from './components/EventManagerSection';
 import { INITIAL_DATA } from './data/defaultData';
-import { Layers, CheckCircle2, BookOpen, Archive as ArchiveIcon, LayoutDashboard, Sparkles, Package } from 'lucide-react';
+import { Layers, CheckCircle2, BookOpen, Archive as ArchiveIcon, LayoutDashboard, Sparkles, Package, MessageSquareText, CalendarDays } from 'lucide-react';
 import './App.css';
 
 const STORAGE_KEY = 'ministry_second_brain_data_v1';
@@ -466,6 +468,22 @@ export default function App() {
           </button>
 
           <button
+            onClick={() => setActiveTab('notice-writer')}
+            className={`nav-tab-btn notice-tab ${activeTab === 'notice-writer' ? 'active' : ''}`}
+          >
+            <span className="tab-badge-letter n-badge">N</span>
+            <span>공지문 작성기</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('events')}
+            className={`nav-tab-btn event-tab ${activeTab === 'events' ? 'active' : ''}`}
+          >
+            <span className="tab-badge-letter e-badge">E</span>
+            <span>행사 관리</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab('guide')}
             className={`nav-tab-btn guide-nav-tab ${activeTab === 'guide' ? 'active' : ''}`}
           >
@@ -499,6 +517,37 @@ export default function App() {
                 <Package size={14} />
                 <span>템플릿 컬렉션 열기</span>
               </button>
+            </div>
+
+            {/* Quick Ministry Tools Highlight Grid */}
+            <div className="dashboard-ministry-tools-grid">
+              <div
+                className="ministry-tool-card notice"
+                onClick={() => setActiveTab('notice-writer')}
+              >
+                <div className="tool-card-icon notice">
+                  <MessageSquareText size={22} />
+                </div>
+                <div className="tool-card-text">
+                  <h4>AI 교회학교 공지문 작성기</h4>
+                  <p>상황·대상·말투 선택으로 4종 공지문 즉시 완성 & 카카오톡 원클릭 발송</p>
+                </div>
+                <span className="tool-card-arrow">바로가기 →</span>
+              </div>
+
+              <div
+                className="ministry-tool-card event"
+                onClick={() => setActiveTab('events')}
+              >
+                <div className="tool-card-icon event">
+                  <CalendarDays size={22} />
+                </div>
+                <div className="tool-card-text">
+                  <h4>행사 관리 & 참가자 접수</h4>
+                  <p>여름성경학교·수련회 등록 현황, 학부모 초대문 복사 및 현장 체크인</p>
+                </div>
+                <span className="tool-card-arrow">바로가기 →</span>
+              </div>
             </div>
 
             {/* Projects Overview */}
@@ -604,6 +653,22 @@ export default function App() {
               onDeleteArchive={(id) => handleDeleteItem('archives', id)}
               onOpenDetail={handleOpenDetail}
             />
+          </div>
+        )}
+
+        {/* Tab: Notice Writer */}
+        {activeTab === 'notice-writer' && (
+          <div className="fade-in">
+            <NoticeWriterSection
+              onSaveToResource={(resItem) => handleSaveItem('Resource', resItem)}
+            />
+          </div>
+        )}
+
+        {/* Tab: Event Manager */}
+        {activeTab === 'events' && (
+          <div className="fade-in">
+            <EventManagerSection />
           </div>
         )}
 
