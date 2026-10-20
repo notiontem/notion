@@ -33,6 +33,7 @@ const PARTNER_STORES = [
     desc: '말씀과 일상을 하나로 잇다. 17개월 올인원 하이퍼링크, 성경 통독 365, SOAP 묵상 서식 등 크리스천의 영적 루틴을 돕는 프리미엄 디지털 플래너 전문 숍.',
     tags: ['굿노트 다이어리', '하이퍼링크 QT', '성경 통독 365', 'SOAP 묵상'],
     url: 'https://smartstore.naver.com/roaster',
+    image: '/main.jpg',
     accentColor: '#10b981',
     buttonColorClass: 'btn-store-emerald',
     icon: BookOpen
@@ -45,6 +46,7 @@ const PARTNER_STORES = [
     desc: '선생님 위로회, 수련회 참가자 선물, 절기 및 교회 행사용으로 맞춤 문구를 캔에 새겨드립니다. 하나하나 정성스럽게 수작업 제작되어 감동을 선사합니다.',
     tags: ['교사 감사선물', '수련회 기념', '행사 다과', '맞춤 레터링'],
     url: 'https://smartstore.naver.com/geochangbunker/products/4551068056',
+    image: '/can.jpg',
     accentColor: '#f59e0b',
     buttonColorClass: 'btn-store-amber',
     icon: Coffee
@@ -57,6 +59,7 @@ const PARTNER_STORES = [
     desc: '국내산 제철 과일부터 수입과일까지 산지 직송의 신선함으로 전달합니다. 교회 친교 모임, 부서 행사, 선생님 선물용으로 건강한 과일 다과를 준비해 보세요.',
     tags: ['부서 친교간식', '행사 다과', '제철 과일', '선물세트'],
     url: 'https://smartstore.naver.com/homeggmi',
+    image: '/fluit.png',
     accentColor: '#6366f1',
     buttonColorClass: 'btn-store-indigo',
     icon: Apple
@@ -228,17 +231,28 @@ export default function PricingSupportSection({ onNavigateTab }) {
           {PARTNER_STORES.map((store) => {
             const IconComponent = store.icon;
             return (
-              <div key={store.id} className="store-card">
-                <div className="store-card-header">
-                  <div className="store-icon-box" style={{ background: `${store.accentColor}18`, color: store.accentColor }}>
-                    <IconComponent size={22} />
+              <div key={store.id} className="store-card group">
+                {/* Store Product Cover Image */}
+                <div className="store-image-wrap">
+                  <img
+                    src={store.image}
+                    alt={store.title}
+                    className="store-cover-image"
+                    loading="lazy"
+                  />
+                  <div
+                    className="store-badge-overlay"
+                    style={{ background: store.accentColor }}
+                  >
+                    <IconComponent size={12} />
+                    <span>{store.badge}</span>
                   </div>
-                  <span className="store-badge" style={{ borderColor: `${store.accentColor}40`, color: store.accentColor }}>
-                    {store.badge}
-                  </span>
                 </div>
 
                 <div className="store-card-body">
+                  <div className="store-brand-row">
+                    <span className="store-brand-name" style={{ color: store.accentColor }}>{store.name}</span>
+                  </div>
                   <h4 className="store-title">{store.title}</h4>
                   <p className="store-desc">{store.desc}</p>
 
