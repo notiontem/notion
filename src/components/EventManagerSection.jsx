@@ -31,7 +31,8 @@ import {
   Edit2,
   Share2,
   MessageCircle,
-  Check
+  Check,
+  RotateCcw
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import {
@@ -42,6 +43,23 @@ import {
 } from '../data/defaultEvents';
 
 const EVENTS_STORAGE_KEY = 'ministry_second_brain_events_v2';
+
+// 공식 카카오톡 말풍선 SVG 아이콘
+function KakaoIcon({ size = 16, className = '' }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      className={className}
+      style={{ display: 'inline-block', verticalAlign: 'middle', flexShrink: 0 }}
+      aria-hidden="true"
+    >
+      <path d="M12 3C6.477 3 2 6.477 2 10.767c0 2.766 1.867 5.197 4.678 6.558-.206.763-.746 2.764-.855 3.193-.135.534.195.526.41.383.169-.112 2.686-1.826 3.774-2.564.64.092 1.309.14 1.993.14 5.523 0 10-3.477 10-7.767S17.523 3 12 3z" />
+    </svg>
+  );
+}
 
 export default function EventManagerSection({ events: propEvents, setEvents: propSetEvents }) {
   const [internalEvents, setInternalEvents] = useState(() => {
@@ -97,6 +115,7 @@ export default function EventManagerSection({ events: propEvents, setEvents: pro
   // Kakao Invitation Preview Modal State
   const [inviteModalEvent, setInviteModalEvent] = useState(null);
   const [inviteCustomText, setInviteCustomText] = useState('');
+  const [inviteTab, setInviteTab] = useState('preview'); // 'preview' | 'edit'
   const [isCopiedInvite, setIsCopiedInvite] = useState(false);
 
   // Toast & File Input Ref
@@ -214,6 +233,7 @@ export default function EventManagerSection({ events: propEvents, setEvents: pro
     const text = generateInviteText(event);
     setInviteCustomText(text);
     setInviteModalEvent(event);
+    setInviteTab('preview');
     setIsCopiedInvite(false);
     setMenuOpenId(null);
   };
@@ -769,9 +789,9 @@ export default function EventManagerSection({ events: propEvents, setEvents: pro
                             <ClipboardCheck size={14} />
                             <span>노션 보고서 복사</span>
                           </button>
-                          <button onClick={() => handleQuickCopyKakaoInvite(event)}>
-                            <Copy size={14} />
-                            <span>카톡 초대문 복사</span>
+                          <button onClick={() => handleOpenKakaoInvite(event)} className="menu-item-kakao">
+                            <KakaoIcon size={14} />
+                            <span>카톡 초대장 열기</span>
                           </button>
                           <button onClick={() => { setEditingEvent(event); setEventModalOpen(true); setMenuOpenId(null); }}>
                             <Settings size={14} />
@@ -868,10 +888,10 @@ export default function EventManagerSection({ events: propEvents, setEvents: pro
 
                     <button
                       onClick={() => handleOpenKakaoInvite(event)}
-                      className="btn-card-secondary"
+                      className="btn-card-kakao"
                       title="학부모 카카오톡 초대장 미리보기 및 전송 창 열기"
                     >
-                      <Send size={13} />
+                      <KakaoIcon size={14} />
                       <span>카톡 초대</span>
                     </button>
 
@@ -1459,19 +1479,23 @@ export default function EventManagerSection({ events: propEvents, setEvents: pro
           </div>
         </div>
       )}
-      {/* Modal 4: Kakao Invitation Preview & Send Modal */}
+      {/* Modal 4: Authentic KakaoTalk Invitation Preview & Send Modal */}
       {inviteModalEvent && (
         <div className="modal-backdrop" onClick={() => setInviteModalEvent(null)}>
           <div className="kakao-invite-modal" onClick={e => e.stopPropagation()}>
+            {/* Kakao Modal Header */}
             <div className="kakao-modal-header">
               <div className="kakao-header-left">
                 <div className="kakao-icon-badge">
-                  <MessageCircle size={20} />
+                  <KakaoIcon size={22} />
                 </div>
                 <div>
-                  <h3>카카오톡 초대장 발송 & 미리보기</h3>
+                  <div className="kakao-badge-row">
+                    <h3>카카오톡 초대장</h3>
+                    <span className="kakao-live-badge">알림톡 스타일</span>
+                  </div>
                   <p className="kakao-modal-sub">
-                    <strong>{inviteModalEvent.title}</strong> 초대 문구를 확인하고 즉시 복사하거나 공유하세요.
+                    <strong>{inviteModalEvent.title}</strong>
                   </p>
                 </div>
               </div>
@@ -1480,31 +1504,177 @@ export default function EventManagerSection({ events: propEvents, setEvents: pro
               </button>
             </div>
 
-            <div className="kakao-modal-body">
-              <div className="kakao-bubble-card">
-                <div className="kakao-bubble-top">
-                  <span className="bubble-label">💌 발송 예정 메시지 미리보기</span>
-                  <span className="bubble-hint">필요에 따라 아래 문구를 직접 편집할 수 있습니다</span>
-                </div>
-                <textarea
-                  className="kakao-bubble-textarea"
-                  rows={11}
-                  value={inviteCustomText}
-                  onChange={e => {
-                    setInviteCustomText(e.target.value);
-                    setIsCopiedInvite(false);
-                  }}
-                  placeholder="초대 문구를 입력하세요..."
-                />
-              </div>
+            {/* View Mode Switch Tabs */}
+            <div className="kakao-mode-tabs">
+              <button
+                type="button"
+                className={`kakao-mode-tab ${inviteTab === 'preview' ? 'active' : ''}`}
+                onClick={() => setInviteTab('preview')}
+              >
+                <MessageCircle size={15} />
+                <span>카톡 화면 미리보기</span>
+              </button>
+              <button
+                type="button"
+                className={`kakao-mode-tab ${inviteTab === 'edit' ? 'active' : ''}`}
+                onClick={() => setInviteTab('edit')}
+              >
+                <Edit2 size={15} />
+                <span>초대 문구 직접 수정</span>
+                <span className="kakao-char-count">{inviteCustomText.length}자</span>
+              </button>
+            </div>
 
-              <div className="kakao-quick-tips">
+            {/* Modal Body */}
+            <div className="kakao-modal-body">
+              {inviteTab === 'preview' ? (
+                /* Authentic KakaoTalk Mobile Chat Screen */
+                <div className="kakao-chat-device">
+                  {/* Phone Top Bar */}
+                  <div className="kakao-chat-topbar">
+                    <div className="kakao-chat-topbar-left">
+                      <ChevronRight size={16} style={{ transform: 'rotate(180deg)' }} />
+                      <div className="kakao-chat-title-group">
+                        <span className="kakao-chat-room-title">교회학교 사역팀</span>
+                        <span className="kakao-chat-room-count">32</span>
+                      </div>
+                    </div>
+                    <div className="kakao-chat-topbar-right">
+                      <Search size={15} />
+                      <MoreVertical size={15} />
+                    </div>
+                  </div>
+
+                  {/* Chat Message Area */}
+                  <div className="kakao-chat-viewport">
+                    {/* Date Pill */}
+                    <div className="kakao-chat-date-pill">
+                      <span>{new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' })}</span>
+                    </div>
+
+                    {/* Chat Message Row */}
+                    <div className="kakao-msg-row">
+                      {/* Avatar */}
+                      <div className="kakao-avatar-box">
+                        <span>⛪</span>
+                      </div>
+
+                      <div className="kakao-msg-col">
+                        <span className="kakao-sender-name">교회학교 디렉터</span>
+
+                        <div className="kakao-bubble-and-meta">
+                          {/* Authentic Kakao Yellow Bubble with Tail */}
+                          <div className="kakao-speech-bubble">
+                            <div className="kakao-bubble-tag-header">
+                              <span className="kakao-tag-dot">●</span>
+                              <span>행사 초대 알림</span>
+                            </div>
+
+                            <div className="kakao-bubble-text-content">
+                              {inviteCustomText}
+                            </div>
+
+                            {/* Simulated Interactive Kakao Action Button */}
+                            <div className="kakao-simulated-button">
+                              <span>📋 온라인 참가 신청서 작성</span>
+                              <ChevronRight size={13} />
+                            </div>
+                          </div>
+
+                          <div className="kakao-msg-meta">
+                            <span className="kakao-unread-count">1</span>
+                            <span className="kakao-msg-time">
+                              {new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: true })}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Quick Edit CTA bar */}
+                  <div className="kakao-preview-quick-cta">
+                    <span>💡 문구를 변경하거나 덧붙이고 싶으신가요?</span>
+                    <button
+                      type="button"
+                      className="btn-link-edit"
+                      onClick={() => setInviteTab('edit')}
+                    >
+                      문구 수정하기 <ChevronRight size={13} />
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                /* Editable Textarea Mode */
+                <div className="kakao-edit-view">
+                  <div className="kakao-edit-header-bar">
+                    <span className="edit-guide-text">
+                      아래 문구를 수정하면 미리보기와 발송본에 즉시 반영됩니다.
+                    </span>
+                    <button
+                      type="button"
+                      className="btn-reset-text"
+                      onClick={() => {
+                        setInviteCustomText(generateInviteText(inviteModalEvent));
+                        setIsCopiedInvite(false);
+                        showToast('기본 초대 문구로 초기화되었습니다.');
+                      }}
+                      title="원래 기본 문구로 되돌리기"
+                    >
+                      <RotateCcw size={13} />
+                      <span>기본 문구로 초기화</span>
+                    </button>
+                  </div>
+
+                  <textarea
+                    className="kakao-editor-textarea"
+                    rows={12}
+                    value={inviteCustomText}
+                    onChange={e => {
+                      setInviteCustomText(e.target.value);
+                      setIsCopiedInvite(false);
+                    }}
+                    placeholder="초대 문구를 자유롭게 작성하세요..."
+                  />
+
+                  {/* Quick Tag Insert Buttons */}
+                  <div className="kakao-quick-tags-row">
+                    <span className="tag-label">빠른 문구 삽입:</span>
+                    <button
+                      type="button"
+                      className="quick-tag-btn"
+                      onClick={() => setInviteCustomText(prev => prev + '\n📌 준비물: 개인 성경, 필기도구, 편한 복장')}
+                    >
+                      + 준비물
+                    </button>
+                    <button
+                      type="button"
+                      className="quick-tag-btn"
+                      onClick={() => setInviteCustomText(prev => prev + '\n🚌 차량 운행: 1호차(9:00), 2호차(9:20)')}
+                    >
+                      + 셔틀차량
+                    </button>
+                    <button
+                      type="button"
+                      className="quick-tag-btn"
+                      onClick={() => setInviteCustomText(prev => prev + '\n💳 회비: 1인 10,000원 (식사 및 교재비 포함)')}
+                    >
+                      + 회비안내
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Usage Tips banner */}
+              <div className="kakao-usage-tip-banner">
+                <span className="tip-icon">💡</span>
                 <p>
-                  💡 <strong>이용 팁:</strong> [초대 문구 복사] 버튼을 누른 후 카카오톡 대화방에 <code>Ctrl + V</code> (Mac: <code>Cmd + V</code>) 하시면 줄바꿈과 이모지가 깔끔하게 전송됩니다. 스마트폰에서는 [스마트폰/카톡 공유]를 누르면 카카오톡 앱이 즉시 열립니다.
+                  <strong>카카오톡 전송 방법:</strong> 아래 <strong>[카카오톡으로 공유 / 복사]</strong> 버튼을 누른 뒤, 카카오톡 단체방이나 학부모님 대화방에서 <code>Ctrl + V</code> (Mac: <code>Cmd + V</code>) 하시면 줄바꿈과 이모지가 예쁘게 바로 전송됩니다!
                 </p>
               </div>
             </div>
 
+            {/* Kakao Modal Footer */}
             <div className="kakao-modal-footer">
               <div className="kakao-footer-left">
                 <a
@@ -1521,13 +1691,32 @@ export default function EventManagerSection({ events: propEvents, setEvents: pro
                 <button
                   type="button"
                   onClick={async () => {
+                    const ok = await copyTextWithFallback(
+                      inviteCustomText,
+                      '초대 문구가 복사되었습니다! 카톡 대화방에 붙여넣기(Ctrl+V) 하세요.'
+                    );
+                    if (ok) {
+                      setIsCopiedInvite(true);
+                      setTimeout(() => setIsCopiedInvite(false), 2500);
+                    }
+                  }}
+                  className="btn-kakao-copy-sub"
+                  title="텍스트만 바로 복사하기"
+                >
+                  <Copy size={14} />
+                  <span>문구만 복사</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={async () => {
                     if (navigator.share) {
                       try {
                         await navigator.share({
                           title: inviteModalEvent.title,
                           text: inviteCustomText,
                         });
-                        showToast('공유 창이 열렸습니다.');
+                        showToast('카카오톡 / 공유 창이 열렸습니다.');
                         return;
                       } catch (err) {
                         if (err.name !== 'AbortError') {
@@ -1544,29 +1733,10 @@ export default function EventManagerSection({ events: propEvents, setEvents: pro
                       setTimeout(() => setIsCopiedInvite(false), 2500);
                     }
                   }}
-                  className="btn-kakao-share"
-                  title="스마트폰 또는 PC에서 카카오톡 및 SNS로 공유"
+                  className={`btn-kakao-main-btn ${isCopiedInvite ? 'copied' : ''}`}
                 >
-                  <Share2 size={14} />
-                  <span>스마트폰/카톡 공유</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={async () => {
-                    const ok = await copyTextWithFallback(
-                      inviteCustomText,
-                      '카카오톡 초대 문구가 복사되었습니다! 카톡 대화방에 붙여넣기(Ctrl+V) 하세요.'
-                    );
-                    if (ok) {
-                      setIsCopiedInvite(true);
-                      setTimeout(() => setIsCopiedInvite(false), 2500);
-                    }
-                  }}
-                  className={`btn-kakao-copy ${isCopiedInvite ? 'copied' : ''}`}
-                >
-                  {isCopiedInvite ? <Check size={15} /> : <Copy size={15} />}
-                  <span>{isCopiedInvite ? '복사 완료! 카톡에 붙여넣으세요' : '초대 문구 복사'}</span>
+                  {isCopiedInvite ? <Check size={16} /> : <KakaoIcon size={16} />}
+                  <span>{isCopiedInvite ? '✓ 복사 완료! 카톡에 붙여넣으세요' : '카카오톡으로 공유 / 복사'}</span>
                 </button>
               </div>
             </div>
