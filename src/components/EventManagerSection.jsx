@@ -28,8 +28,12 @@ import {
   CheckSquare,
   Square,
   X,
-  Edit2
+  Edit2,
+  Share2,
+  MessageCircle,
+  Check
 } from 'lucide-react';
+import confetti from 'canvas-confetti';
 import {
   DEFAULT_EVENTS,
   EVENT_TEMPLATES,
@@ -82,6 +86,11 @@ export default function EventManagerSection({ events: propEvents, setEvents: pro
     status: 'confirmed'
   });
 
+  // Kakao Invitation Preview Modal State
+  const [inviteModalEvent, setInviteModalEvent] = useState(null);
+  const [inviteCustomText, setInviteCustomText] = useState('');
+  const [isCopiedInvite, setIsCopiedInvite] = useState(false);
+
   // Toast & File Input Ref
   const [toast, setToast] = useState({ visible: false, message: '' });
   const csvFileInputRef = useRef(null);
@@ -91,39 +100,83 @@ export default function EventManagerSection({ events: propEvents, setEvents: pro
     setTimeout(() => setToast({ visible: false, message: '' }), 2500);
   };
 
-  // Sync to LocalStorage
-  useEffect(() => {
-    localStorage.setItem(EVENTS_STORAGE_KEY, JSON.stringify(events));
-  }, [events]);
-
-  // Keep modal event synced when events change
-  useEffect(() => {
-    if (appsModalEvent) {
-      const found = events.find(e => e.id === appsModalEvent.id);
-      if (found) setAppsModalEvent(found);
+  // Robust clipboard copy with fallback (모든 브라우저/환경 100% 호환)
+  const copyTextWithFallback = async (text, successMsg = '클립보드에 복사되었습니다.') => {
+    let copied = false;
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        copied = true;
+      }
+    } catch (e) {
+      console.warn('navigator.clipboard failed, attempting fallback...', e);
     }
-  }, [events]);
 
-  // Calculations
-  const totalEvents = events.length;
-  const openEvents = events.filter(e => e.status === 'open').length;
-  const totalApplicants = events.reduce((sum, e) => sum + (e.applications?.length || 0), 0);
-  const checkedInCount = events.reduce((sum, e) => {
-    return sum + (e.applications?.filter(a => a.check_in_status === 'checked_in').length || 0);
-  }, 0);
+    if (!copied) {
+      try {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-9999px';
+        textArea.style.top = '-9999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        copied = document.execCommand('copy');
+        document.body.removeChild(textArea);
+      } catch (err) {
+        console.error('Fallback copy failed:', err);
+      }
+    }
 
-  // Copy Kakao Invitation
-  const handleCopyKakaoInvite = (event) => {
-    const dateStr = event.start_date
-      ? new Date(event.start_date).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' }) +
-        (event.end_date && event.end_date !== event.start_date
-          ? ' ~ ' + new Date(event.end_date).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' })
-          : '')
-      : '추후 공지';
+    if (copied) {
+      try {
+        confetti({
+          particleCount: 35,
+          spread: 55,
+          origin: { y: 0.8 },
+          colors: ['#2A6E53', '#81C784', '#3b82f6', '#f59e0b']
+        });
+      } catch {}
+      showToast(successMsg);
+      return true;
+    } else {
+      alert('클립보드 자동 복사에 실패했습니다. 창에 표시된 초대 문구를 직접 복사(Ctrl+C)해주세요.');
+      return false;
+    }
+  };
 
-    const deadlineStr = event.deadline
-      ? new Date(event.deadline).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' }) + '까지'
-      : '';
+  // Helper: Format event invitation text safely
+  const generateInviteText = (event) => {
+    let dateStr = '추후 공지';
+    if (event.start_date) {
+      try {
+        const start = new Date(event.start_date);
+        if (!isNaN(start.getTime())) {
+          dateStr = start.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' });
+          if (event.end_date && event.end_date !== event.start_date) {
+            const end = new Date(event.end_date);
+            if (!isNaN(end.getTime())) {
+              dateStr += ' ~ ' + end.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' });
+            }
+          }
+        }
+      } catch (e) {
+        dateStr = event.start_date;
+      }
+    }
+
+    let deadlineStr = '';
+    if (event.deadline) {
+      try {
+        const dl = new Date(event.deadline);
+        if (!isNaN(dl.getTime())) {
+          deadlineStr = dl.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' }) + '까지';
+        }
+      } catch (e) {
+        deadlineStr = event.deadline;
+      }
+    }
 
     const lines = [];
     lines.push(`💌 우리 아이들과 함께하는`);
@@ -131,8 +184,8 @@ export default function EventManagerSection({ events: propEvents, setEvents: pro
     lines.push('');
     lines.push(`📅 일시: ${dateStr}`);
     if (event.location) lines.push(`📍 장소: ${event.location}`);
-    if (deadlineStr) lines.push(`⏰ 마감: ${deadlineStr}`);
-    if (event.capacity) lines.push(`👥 정원: 선착순 ${event.capacity}명`);
+    if (deadlineStr) lines.push(`⏰ 신청마감: ${deadlineStr}`);
+    if (event.capacity) lines.push(`👥 모집정원: 선착순 ${event.capacity}명`);
     if (event.description) {
       lines.push('');
       lines.push(event.description);
@@ -145,9 +198,23 @@ export default function EventManagerSection({ events: propEvents, setEvents: pro
     lines.push('선생님들이 기도하며 기다리고 있습니다 😊');
     lines.push('참석을 희망하시는 가정은 아래 연락처 또는 신청서를 제출해주세요!');
 
-    navigator.clipboard.writeText(lines.join('\n'));
+    return lines.join('\n');
+  };
+
+  // Open Kakao Invite Modal (카톡 초대 클릭 시 미리보기 모달 오픈)
+  const handleOpenKakaoInvite = (event) => {
+    const text = generateInviteText(event);
+    setInviteCustomText(text);
+    setInviteModalEvent(event);
+    setIsCopiedInvite(false);
     setMenuOpenId(null);
-    showToast('카카오톡 초대 문구가 클립보드에 복사되었습니다.');
+  };
+
+  // Quick Copy Kakao Invitation (더보기 메뉴에서 즉시 복사)
+  const handleQuickCopyKakaoInvite = async (event) => {
+    const text = generateInviteText(event);
+    setMenuOpenId(null);
+    await copyTextWithFallback(text, `[${event.title}] 카카오톡 초대 문구가 복사되었습니다! 카톡에 Ctrl+V 하세요.`);
   };
 
   // Clone Event
@@ -694,7 +761,7 @@ export default function EventManagerSection({ events: propEvents, setEvents: pro
                             <ClipboardCheck size={14} />
                             <span>노션 보고서 복사</span>
                           </button>
-                          <button onClick={() => handleCopyKakaoInvite(event)}>
+                          <button onClick={() => handleQuickCopyKakaoInvite(event)}>
                             <Copy size={14} />
                             <span>카톡 초대문 복사</span>
                           </button>
@@ -792,9 +859,9 @@ export default function EventManagerSection({ events: propEvents, setEvents: pro
                     </button>
 
                     <button
-                      onClick={() => handleCopyKakaoInvite(event)}
+                      onClick={() => handleOpenKakaoInvite(event)}
                       className="btn-card-secondary"
-                      title="학부모 카카오톡 초대 메시지 생성 및 복사"
+                      title="학부모 카카오톡 초대장 미리보기 및 전송 창 열기"
                     >
                       <Send size={13} />
                       <span>카톡 초대</span>
@@ -1381,6 +1448,120 @@ export default function EventManagerSection({ events: propEvents, setEvents: pro
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {/* Modal 4: Kakao Invitation Preview & Send Modal */}
+      {inviteModalEvent && (
+        <div className="modal-backdrop" onClick={() => setInviteModalEvent(null)}>
+          <div className="kakao-invite-modal" onClick={e => e.stopPropagation()}>
+            <div className="kakao-modal-header">
+              <div className="kakao-header-left">
+                <div className="kakao-icon-badge">
+                  <MessageCircle size={20} />
+                </div>
+                <div>
+                  <h3>카카오톡 초대장 발송 & 미리보기</h3>
+                  <p className="kakao-modal-sub">
+                    <strong>{inviteModalEvent.title}</strong> 초대 문구를 확인하고 즉시 복사하거나 공유하세요.
+                  </p>
+                </div>
+              </div>
+              <button onClick={() => setInviteModalEvent(null)} className="btn-modal-close">
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="kakao-modal-body">
+              <div className="kakao-bubble-card">
+                <div className="kakao-bubble-top">
+                  <span className="bubble-label">💌 발송 예정 메시지 미리보기</span>
+                  <span className="bubble-hint">필요에 따라 아래 문구를 직접 편집할 수 있습니다</span>
+                </div>
+                <textarea
+                  className="kakao-bubble-textarea"
+                  rows={11}
+                  value={inviteCustomText}
+                  onChange={e => {
+                    setInviteCustomText(e.target.value);
+                    setIsCopiedInvite(false);
+                  }}
+                  placeholder="초대 문구를 입력하세요..."
+                />
+              </div>
+
+              <div className="kakao-quick-tips">
+                <p>
+                  💡 <strong>이용 팁:</strong> [초대 문구 복사] 버튼을 누른 후 카카오톡 대화방에 <code>Ctrl + V</code> (Mac: <code>Cmd + V</code>) 하시면 줄바꿈과 이모지가 깔끔하게 전송됩니다. 스마트폰에서는 [스마트폰/카톡 공유]를 누르면 카카오톡 앱이 즉시 열립니다.
+                </p>
+              </div>
+            </div>
+
+            <div className="kakao-modal-footer">
+              <div className="kakao-footer-left">
+                <a
+                  href={`sms:?body=${encodeURIComponent(inviteCustomText)}`}
+                  className="btn-kakao-sms"
+                  title="스마트폰 문자(SMS) 앱으로 바로 열기"
+                >
+                  <Phone size={14} />
+                  <span>문자(SMS) 앱 열기</span>
+                </a>
+              </div>
+
+              <div className="kakao-footer-right">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (navigator.share) {
+                      try {
+                        await navigator.share({
+                          title: inviteModalEvent.title,
+                          text: inviteCustomText,
+                        });
+                        showToast('공유 창이 열렸습니다.');
+                        return;
+                      } catch (err) {
+                        if (err.name !== 'AbortError') {
+                          console.error('Share failed:', err);
+                        }
+                      }
+                    }
+                    const ok = await copyTextWithFallback(
+                      inviteCustomText,
+                      '카카오톡 초대 문구가 복사되었습니다! 카톡 대화방에 붙여넣기(Ctrl+V) 하세요.'
+                    );
+                    if (ok) {
+                      setIsCopiedInvite(true);
+                      setTimeout(() => setIsCopiedInvite(false), 2500);
+                    }
+                  }}
+                  className="btn-kakao-share"
+                  title="스마트폰 또는 PC에서 카카오톡 및 SNS로 공유"
+                >
+                  <Share2 size={14} />
+                  <span>스마트폰/카톡 공유</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const ok = await copyTextWithFallback(
+                      inviteCustomText,
+                      '카카오톡 초대 문구가 복사되었습니다! 카톡 대화방에 붙여넣기(Ctrl+V) 하세요.'
+                    );
+                    if (ok) {
+                      setIsCopiedInvite(true);
+                      setTimeout(() => setIsCopiedInvite(false), 2500);
+                    }
+                  }}
+                  className={`btn-kakao-copy ${isCopiedInvite ? 'copied' : ''}`}
+                >
+                  {isCopiedInvite ? <Check size={15} /> : <Copy size={15} />}
+                  <span>{isCopiedInvite ? '복사 완료! 카톡에 붙여넣으세요' : '초대 문구 복사'}</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
