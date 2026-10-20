@@ -15,10 +15,11 @@ import Ambient3DBackground from './components/Ambient3DBackground';
 import UserGuidePage from './components/UserGuidePage';
 import NoticeWriterSection from './components/NoticeWriterSection';
 import EventManagerSection from './components/EventManagerSection';
+import PricingSupportSection from './components/PricingSupportSection';
 import DashboardHome from './components/DashboardHome';
 import { INITIAL_DATA } from './data/defaultData';
 import { DEFAULT_EVENTS } from './data/defaultEvents';
-import { Layers, CheckCircle2, BookOpen, Archive as ArchiveIcon, LayoutDashboard, Sparkles, Package, MessageSquareText, CalendarDays, ChevronDown, Check } from 'lucide-react';
+import { Layers, CheckCircle2, BookOpen, Archive as ArchiveIcon, LayoutDashboard, Sparkles, Package, MessageSquareText, CalendarDays, ChevronDown, Check, Heart } from 'lucide-react';
 import './App.css';
 
 const STORAGE_KEY = 'ministry_second_brain_data_v1';
@@ -623,6 +624,17 @@ export default function App() {
               <BookOpen size={15} />
               <span>활용 가이드</span>
             </button>
+
+            {/* 6. Pricing & Ministry Support */}
+            <button
+              onClick={() => { setActiveTab('pricing'); setParaMenuOpen(false); }}
+              className={`nav-tab-btn pricing-nav-tab ${activeTab === 'pricing' ? 'active' : ''}`}
+              title="사역 후원 & 동행 안내 (100% 영구 무료 지원)"
+            >
+              <Heart size={15} className="heart-nav-icon" />
+              <span>사역 후원 & 동행</span>
+              <span className="nav-tag-badge free">100% 무료</span>
+            </button>
           </div>
         </nav>
 
@@ -767,6 +779,15 @@ export default function App() {
               onOpenPresetModal={() => setPresetModalOpen(true)}
               userNotionUrl={userNotionUrl}
             />
+          </div>
+        )}
+
+        {/* Tab: Pricing & Ministry Support */}
+        {activeTab === 'pricing' && (
+          <div className="fade-in">
+            <SectionErrorBoundary onReset={() => setActiveTab('dashboard')}>
+              <PricingSupportSection onNavigateTab={setActiveTab} />
+            </SectionErrorBoundary>
           </div>
         )}
       </main>

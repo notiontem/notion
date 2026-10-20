@@ -19,7 +19,8 @@ import {
   ExternalLink,
   SlidersHorizontal,
   Flame,
-  Check
+  Check,
+  Heart
 } from 'lucide-react';
 import SmartAIAssistant from './SmartAIAssistant';
 
@@ -409,6 +410,27 @@ export default function DashboardHome({
           >
             <Package size={14} />
             <span>템플릿 컬렉션 열기</span>
+          </button>
+        </div>
+      </section>
+
+      {/* 4.5 Ministry Support & Partner Store Banner */}
+      <section className="dashboard-starter-section support-banner">
+        <div className="starter-banner-content support">
+          <div className="starter-banner-info">
+            <span className="starter-badge support">
+              <Heart size={13} className="heart-nav-icon" />
+              <span>100% 영구 무료 사역 지원</span>
+            </span>
+            <h4>사역을 살리는 따뜻한 동행 (파트너 스토어 & 후원)</h4>
+            <p>구독료 걱정 없이 평생 무료로 사역하세요. 파트너 스토어 이용과 자발적 후원이 다음 세대 신앙 교육을 지켜줍니다.</p>
+          </div>
+          <button
+            onClick={() => onNavigateTab('pricing')}
+            className="btn-starter-open support"
+          >
+            <Heart size={14} />
+            <span>사역 동행 & 후원 보기</span>
           </button>
         </div>
       </section>
