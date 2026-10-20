@@ -473,7 +473,15 @@ export default function DashboardHome({
       </section>
 
       {/* 4.5 Ministry Support & Partner Store Banner - Redesigned Clean Strip */}
-      <section className="dashboard-support-strip" onClick={() => onNavigateTab('pricing')} role="button" title="사역 동행 & 후원 페이지로 이동">
+      <section
+        className="dashboard-support-strip"
+        onClick={() => {
+          window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+          onNavigateTab('pricing');
+        }}
+        role="button"
+        title="사역 동행 & 후원 페이지로 이동"
+      >
         <div className="support-strip-left">
           <div className="support-strip-icon-box">
             <Heart size={22} className="heart-nav-icon" />
@@ -496,6 +504,7 @@ export default function DashboardHome({
           type="button"
           onClick={(e) => {
             e.stopPropagation();
+            window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
             onNavigateTab('pricing');
           }}
           className="btn-support-strip-action"

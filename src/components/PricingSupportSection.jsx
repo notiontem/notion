@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Heart,
   Sparkles,
@@ -90,6 +90,11 @@ export default function PricingSupportSection({ onNavigateTab }) {
   const [copiedUrl, setCopiedUrl] = useState(false);
   const [openFaqIndex, setOpenFaqIndex] = useState(0);
   const [toastMessage, setToastMessage] = useState('');
+
+  // 페이지 진입 시 화면 최상단으로 스크롤
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, []);
 
   const showToast = (msg) => {
     setToastMessage(msg);

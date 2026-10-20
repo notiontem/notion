@@ -203,8 +203,13 @@ export default function App() {
     localStorage.setItem(CSV_NEW_ONLY_KEY, csvOnlyNew ? '1' : '0');
   }, [csvOnlyNew]);
 
-  // Active Tab: 'dashboard' | 'projects' | 'areas' | 'resources' | 'archives' | 'guide' | 'notice-writer' | 'events'
+  // Active Tab: 'dashboard' | 'projects' | 'areas' | 'resources' | 'archives' | 'guide' | 'notice-writer' | 'events' | 'pricing' | 'ai-assistant'
   const [activeTab, setActiveTab] = useState('dashboard');
+
+  // 탭 이동 시 항상 페이지 최상단으로 스크롤
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [activeTab]);
 
   // Second Brain Dropdown Menu
   const [paraMenuOpen, setParaMenuOpen] = useState(false);
