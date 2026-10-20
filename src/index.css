@@ -28,9 +28,9 @@
   --project-light: #FDF3F2;
   --project-border: #F6C8C4;
 
-  --area-color: #24587A;           /* 차분한 딥 오션 */
-  --area-light: #EFF5F9;
-  --area-border: #C8DCED;
+  --area-color: #1E3A8A;           /* 정갈하고 깊이 있는 딥 네이비 */
+  --area-light: #F0F4FA;
+  --area-border: #CBD5E1;
 
   --resource-color: #2A6E53;       /* 포레스트 세이지 */
   --resource-light: #EFF7F3;
@@ -82,9 +82,9 @@
   --project-light: rgba(229, 115, 115, 0.12);
   --project-border: rgba(229, 115, 115, 0.25);
 
-  --area-color: #64B5F6;
-  --area-light: rgba(100, 181, 246, 0.12);
-  --area-border: rgba(100, 181, 246, 0.25);
+  --area-color: #93C5FD;
+  --area-light: rgba(147, 197, 253, 0.12);
+  --area-border: rgba(147, 197, 253, 0.25);
 
   --resource-color: #81C784;
   --resource-light: rgba(129, 199, 132, 0.12);

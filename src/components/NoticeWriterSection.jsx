@@ -256,7 +256,7 @@ export default function NoticeWriterSection({ onSaveToResource }) {
       subtitle: '80바이트 이내 또는 핵심 내용만 군더더기 없이 전달',
       icon: Mail,
       badge: 'SMS',
-      color: '#0284c7',
+      color: '#1e3a8a',
       content: results?.version1 || ''
     },
     {

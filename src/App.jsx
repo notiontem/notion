@@ -144,7 +144,7 @@ class SectionErrorBoundary extends React.Component {
               this.setState({ hasError: false, error: null });
               if (this.props.onReset) this.props.onReset();
             }}
-            style={{ padding: '10px 20px', background: 'var(--primary-color, #3b82f6)', color: '#fff', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 600 }}
+            style={{ padding: '10px 20px', background: 'var(--brand-primary, #1e3a8a)', color: '#fff', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 600 }}
           >
             대시보드로 돌아가기
           </button>
