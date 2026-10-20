@@ -140,7 +140,7 @@ export default function PricingSupportSection({ onNavigateTab }) {
   const handleCopyAccount = async () => {
     const success = await copyTextToClipboard(
       '3333-07-0197297',
-      '카카오뱅크 후원 계좌(3333-07-0197297)가 복사되었습니다!'
+      '카카오뱅크 후원 계좌(3333-07-0197297, 예금주: 전정우)가 복사되었습니다!'
     );
     if (success) {
       setCopiedAccount(true);
@@ -307,7 +307,7 @@ export default function PricingSupportSection({ onNavigateTab }) {
               <span className="bank-logo-text">kakao</span>
               <span className="bank-label">카카오뱅크</span>
             </div>
-            <span className="account-holder">예금주: 벙커 목양</span>
+            <span className="account-holder">예금주: 전정우</span>
           </div>
 
           <div className="account-number-row">
