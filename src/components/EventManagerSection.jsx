@@ -57,6 +57,14 @@ export default function EventManagerSection({ events: propEvents, setEvents: pro
   const events = propEvents || internalEvents;
   const setEvents = propSetEvents || setInternalEvents;
 
+  // 통계 계산 (영웅 배너에 표시)
+  const totalEvents = events?.length || 0;
+  const openEvents = (events || []).filter(e => e.status === 'open').length;
+  const totalApplicants = (events || []).reduce((sum, e) => sum + (e.applications?.length || 0), 0);
+  const checkedInCount = (events || []).reduce((sum, e) => {
+    return sum + (e.applications?.filter(a => a.check_in_status === 'checked_in').length || 0);
+  }, 0);
+
   const [activeTab, setActiveTab] = useState('list'); // 'list' | 'templates'
   const [menuOpenId, setMenuOpenId] = useState(null);
 

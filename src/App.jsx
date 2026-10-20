@@ -119,6 +119,41 @@ function migrateData(saved) {
   };
 }
 
+class SectionErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error, errorInfo) {
+    console.error('Section Error:', error, errorInfo);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ padding: '48px 24px', textAlign: 'center', background: 'var(--surface-color, #1e293b)', borderRadius: '16px', margin: '20px 0', border: '1px solid var(--border-color, #334155)' }}>
+          <h3 style={{ fontSize: '1.25rem', marginBottom: '8px', color: '#ef4444', fontWeight: 600 }}>화면을 불러오는 중 문제가 발생했습니다</h3>
+          <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '20px' }}>
+            {this.state.error?.message || '잠시 후 다시 시도해주세요.'}
+          </p>
+          <button
+            onClick={() => {
+              this.setState({ hasError: false, error: null });
+              if (this.props.onReset) this.props.onReset();
+            }}
+            style={{ padding: '10px 20px', background: 'var(--primary-color, #3b82f6)', color: '#fff', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 600 }}
+          >
+            대시보드로 돌아가기
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 export default function App() {
   // Theme state
   const [theme, setTheme] = useState(() => {
@@ -714,10 +749,12 @@ export default function App() {
         {/* Tab: Event Manager */}
         {activeTab === 'events' && (
           <div className="fade-in">
-            <EventManagerSection
-              events={events}
-              setEvents={setEvents}
-            />
+            <SectionErrorBoundary onReset={() => setActiveTab('dashboard')}>
+              <EventManagerSection
+                events={events}
+                setEvents={setEvents}
+              />
+            </SectionErrorBoundary>
           </div>
         )}
 
