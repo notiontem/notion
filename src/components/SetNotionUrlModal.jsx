@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { X, ExternalLink, Link, Check, Sparkles, HelpCircle } from 'lucide-react';
+import {
+  X,
+  ExternalLink,
+  Link2,
+  Check,
+  Clipboard,
+  ShieldCheck,
+  Trash2,
+  ArrowRight
+} from 'lucide-react';
 
 const DEFAULT_ORIGINAL_TEMPLATE = "https://lava-child-76b.notion.site/Ministry-Second-Brain-PARA-faa57f770752494db4bf529eaf689998";
 
@@ -38,98 +47,199 @@ export default function SetNotionUrlModal({
   };
 
   const handleResetToDefault = () => {
-    onSaveUrl('');
-    setUrlInput('');
+    if (window.confirm('등록된 노션 연결 링크를 해제하시겠습니까?')) {
+      onSaveUrl('');
+      setUrlInput('');
+      onClose();
+    }
+  };
+
+  const handlePasteClipboard = async () => {
+    try {
+      if (navigator.clipboard && navigator.clipboard.readText) {
+        const text = await navigator.clipboard.readText();
+        if (text && (text.startsWith('http://') || text.startsWith('https://'))) {
+          setUrlInput(text.trim());
+          if (errorMessage) setErrorMessage('');
+        }
+      }
+    } catch {
+      // Ignore clipboard read permission denied
+    }
   };
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-container url-modal" onClick={(e) => e.stopPropagation()}>
-        {/* Header */}
-        <div className="modal-header">
-          <div className="modal-title-box">
-            <span className="notion-icon">N</span>
+      <div className="modal-container url-modal-card fade-in" onClick={(e) => e.stopPropagation()}>
+        {/* Modal Top Header */}
+        <div className="url-modal-header">
+          <div className="url-modal-brand">
+            <div className="url-notion-symbol">
+              <span>N</span>
+            </div>
             <div>
-              <h3 className="modal-title">내 노션 템플릿 링크 설정</h3>
-              <p className="modal-sub">본인의 노션 워크스페이스에 복제된 전용 페이지 URL을 연결합니다</p>
+              <div className="url-badge-tag">
+                <Link2 size={11} />
+                <span>Notion Workspace Sync</span>
+              </div>
+              <h3 className="url-modal-heading">내 노션 워크스페이스 연결</h3>
+              <p className="url-modal-desc">
+                구매하신 공식 템플릿을 내 노션에 복제한 후, 해당 페이지 주소를 연결합니다.
+              </p>
             </div>
           </div>
-          <button onClick={onClose} className="modal-close-btn">
-            <X size={18} />
+          <button onClick={onClose} className="url-modal-close-btn" title="닫기">
+            <X size={17} />
           </button>
         </div>
 
-        {/* Body */}
-        <div className="modal-body">
-          <div className="url-guide-card">
-            <div className="url-guide-step">
-              <span className="step-num">1</span>
-              <div>
-                <strong>아직 템플릿을 내 노션에 복제하지 않으셨나요?</strong>
-                <p>아래 버튼을 눌러 원본 템플릿을 열고, 우측 상단 <strong>[복제(Duplicate)]</strong>를 눌러 본인의 노션에 추가하세요.</p>
+        {/* Modal Body */}
+        <div className="url-modal-body">
+          {/* Current Connection Status Box */}
+          {currentUrl ? (
+            <div className="url-status-box connected">
+              <div className="status-box-left">
+                <div className="status-indicator-dot online" />
+                <div className="status-info-text">
+                  <span className="status-title">현재 내 노션과 연동되어 있습니다</span>
+                  <a
+                    href={currentUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="status-url-link"
+                    title="새 창에서 내 노션 열기"
+                  >
+                    <span>{currentUrl}</span>
+                    <ExternalLink size={12} />
+                  </a>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="url-status-box empty">
+              <div className="status-box-left">
+                <div className="status-indicator-dot pending" />
+                <div className="status-info-text">
+                  <span className="status-title">아직 내 노션 주소가 등록되지 않았습니다</span>
+                  <span className="status-sub">아래 2단계 안내에 따라 복제본 링크를 등록해 주세요.</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 2-Step Friendly Visual Guide */}
+          <div className="url-steps-container">
+            {/* Step 1 */}
+            <div className="url-step-row">
+              <div className="url-step-badge">1</div>
+              <div className="url-step-content">
+                <div className="url-step-text-wrap">
+                  <strong>공식 템플릿을 내 노션에 복제하셨나요?</strong>
+                  <p>아직 복제하지 않으셨다면 원본 페이지 우측 상단의 <strong>[복제(Duplicate)]</strong>를 먼저 실행하세요.</p>
+                </div>
                 <a
                   href={DEFAULT_ORIGINAL_TEMPLATE}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="btn-text-link"
+                  className="btn-open-template"
                 >
-                  <span>원본 템플릿 열기 & 복제하러 가기</span>
-                  <ExternalLink size={13} />
+                  <span>공식 원본 템플릿 열기</span>
+                  <ExternalLink size={12} />
                 </a>
               </div>
             </div>
 
-            <div className="url-guide-step">
-              <span className="step-num">2</span>
-              <div>
-                <strong>내 노션 페이지 링크 복사하기</strong>
-                <p>복제된 본인 노션 페이지 우측 상단 <strong>[공유(Share)] ➡️ [링크 복사(Copy link)]</strong>를 누른 뒤 아래에 붙여넣으세요.</p>
+            {/* Step 2 */}
+            <div className="url-step-row">
+              <div className="url-step-badge">2</div>
+              <div className="url-step-content">
+                <div className="url-step-text-wrap">
+                  <strong>복제된 내 페이지 주소 복사하기</strong>
+                  <p>내 노션 페이지 우측 상단 <strong>[공유(Share)] ➔ [링크 복사]</strong>를 클릭한 뒤 아래에 붙여넣으세요.</p>
+                </div>
               </div>
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="modal-form">
-            <div className="form-group">
-              <label className="form-label">내 노션 페이지 URL 주소</label>
-              <div className="url-input-wrap">
-                <Link size={16} className="url-input-icon" />
+          {/* Form Area */}
+          <form onSubmit={handleSubmit} className="url-submit-form">
+            <div className="url-field-group">
+              <div className="url-field-label-row">
+                <label className="url-field-label" htmlFor="notion-url-input">
+                  내 노션 페이지 링크 (URL)
+                </label>
+                {typeof navigator !== 'undefined' && navigator.clipboard && (
+                  <button
+                    type="button"
+                    onClick={handlePasteClipboard}
+                    className="btn-quick-paste"
+                    title="클립보드에 복사된 링크 붙여넣기"
+                  >
+                    <Clipboard size={12} />
+                    <span>붙여넣기</span>
+                  </button>
+                )}
+              </div>
+
+              <div className={`url-input-box ${errorMessage ? 'has-error' : ''}`}>
+                <Link2 size={16} className="url-icon-left" />
                 <input
-                  type="text"
+                  id="notion-url-input"
+                  type="url"
                   value={urlInput}
                   onChange={(e) => {
                     setUrlInput(e.target.value);
                     if (errorMessage) setErrorMessage('');
                   }}
                   placeholder="https://www.notion.so/my-workspace/Ministry-Second-Brain-..."
-                  className="form-input url-input"
+                  className="url-text-input"
                   autoFocus
                 />
               </div>
-              {errorMessage && <p className="form-error-msg">{errorMessage}</p>}
+
+              {errorMessage && (
+                <div className="url-error-alert fade-in">
+                  <span>{errorMessage}</span>
+                </div>
+              )}
             </div>
 
-            <div className="url-modal-tips">
-              <HelpCircle size={14} className="text-muted" />
-              <span>등록된 주소는 사용자의 브라우저(로컬 스토리지)에 안전하게 저장되어 유지됩니다.</span>
+            {/* Security / Privacy Trust Strip */}
+            <div className="url-privacy-trust">
+              <ShieldCheck size={14} className="shield-icon" />
+              <span>등록된 주소는 외부 서버로 전송되지 않으며, 사역자 본인의 기기(로컬 브라우저)에만 안전하게 보관됩니다.</span>
             </div>
 
-            <div className="modal-footer url-modal-footer">
-              {currentUrl && (
+            {/* Modal Bottom Footer Actions */}
+            <div className="url-modal-bottom-actions">
+              <div className="actions-left">
+                {currentUrl ? (
+                  <button
+                    type="button"
+                    onClick={handleResetToDefault}
+                    className="btn-url-disconnect"
+                    title="노션 연결 해제하기"
+                  >
+                    <Trash2 size={13} />
+                    <span>연결 해제</span>
+                  </button>
+                ) : null}
+              </div>
+
+              <div className="actions-right">
                 <button
                   type="button"
-                  onClick={handleResetToDefault}
-                  className="btn-danger-outline"
+                  onClick={onClose}
+                  className="btn-url-cancel"
                 >
-                  연결 해제 (초기화)
-                </button>
-              )}
-              <div className="footer-right-buttons">
-                <button type="button" onClick={onClose} className="btn-secondary">
                   취소
                 </button>
-                <button type="submit" className="btn-primary">
-                  <Check size={16} />
-                  <span>내 노션 링크 저장</span>
+                <button
+                  type="submit"
+                  className="btn-url-save"
+                >
+                  <Check size={14} />
+                  <span>내 노션 연결 저장</span>
                 </button>
               </div>
             </div>
