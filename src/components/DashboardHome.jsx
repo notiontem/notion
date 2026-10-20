@@ -35,7 +35,7 @@ export default function DashboardHome({
   onSaveItem,
   assistantRef
 }) {
-  const [showAiAssistant, setShowAiAssistant] = useState(false);
+  const [showAiAssistant, setShowAiAssistant] = useState(true);
   const [copiedEventId, setCopiedEventId] = useState(null);
 
   // Statistics
@@ -121,7 +121,65 @@ export default function DashboardHome({
         </div>
       </section>
 
-      {/* 2. Core 4-Service Launcher Hub - "어떤 작업을 시작하시겠습니까?" */}
+      {/* 2. [Promoted Golden Zone] AI Smart Ministry Drafting Studio */}
+      <section className="dashboard-ai-studio-section" ref={assistantRef}>
+        <div className="dash-ai-studio-card">
+          <div className="dash-ai-studio-header">
+            <div className="dash-ai-studio-title-wrap">
+              <div className="dash-ai-studio-icon">
+                <Sparkles size={20} />
+              </div>
+              <div className="dash-ai-studio-text">
+                <div className="dash-ai-badge-row">
+                  <span className="dash-ai-badge">
+                    <Sparkles size={11} />
+                    <span>스마트 사역 AI 브레인스토밍</span>
+                  </span>
+                  <span className="dash-ai-pill">1초 아웃라인 생성</span>
+                </div>
+                <h3 className="dash-ai-title">오늘 어떤 사역 아이디어를 기획하시겠습니까?</h3>
+                <p className="dash-ai-desc">
+                  설교 본문 구상, 수련회 일정(WBS), 환우 심방 가이드, 찬양 콘티를 즉시 체계화하고 노션에 저장합니다.
+                </p>
+              </div>
+            </div>
+
+            <div className="dash-ai-header-actions">
+              <button
+                type="button"
+                onClick={() => onNavigateTab('ai-assistant')}
+                className="btn-ai-fullscreen"
+                title="전용 AI 사역 기획실 전체화면 열기"
+              >
+                <span>전용 기획실 전체화면</span>
+                <ArrowRight size={13} />
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowAiAssistant(!showAiAssistant)}
+                className="btn-ai-toggle-compact"
+                title={showAiAssistant ? "기획실 접기" : "기획실 펼치기"}
+              >
+                <span>{showAiAssistant ? '기획실 접기' : '기획실 열기'}</span>
+                {showAiAssistant ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+              </button>
+            </div>
+          </div>
+
+          {showAiAssistant && (
+            <div className="dash-ai-studio-body fade-in">
+              <SmartAIAssistant
+                areas={data.areas}
+                onAddGeneratedItem={(type, item) => onSaveItem(type, item)}
+                hideHeader={true}
+                compactMode={true}
+              />
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* 3. Core 4-Service Launcher Hub - "어떤 작업을 시작하시겠습니까?" */}
       <section className="service-launcher-section">
         <div className="section-title-wrap">
           <div className="title-left">
@@ -445,40 +503,6 @@ export default function DashboardHome({
           <span>사역 동행 & 후원 보기</span>
           <ArrowRight size={14} />
         </button>
-      </section>
-
-      {/* 5. Smart AI Assistant Drawer (Collapsible) */}
-      <section className="ai-assistant-drawer-section" ref={assistantRef}>
-        <div className="ai-drawer-card">
-          <div
-            className="ai-drawer-header"
-            onClick={() => setShowAiAssistant(!showAiAssistant)}
-            role="button"
-          >
-            <div className="ai-drawer-title-wrap">
-              <div className="ai-sparkle-icon">
-                <Sparkles size={18} />
-              </div>
-              <div>
-                <h4>스마트 목회 AI 어시스턴트</h4>
-                <p>설교 개요, 소그룹 나눔 질문, 사역 기획안 아이디어가 필요할 때 바로 활용하세요.</p>
-              </div>
-            </div>
-            <button className="btn-ai-toggle">
-              <span>{showAiAssistant ? '작성기 닫기' : 'AI 작성기 열기'}</span>
-              {showAiAssistant ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-            </button>
-          </div>
-
-          {showAiAssistant && (
-            <div className="ai-drawer-body fade-in">
-              <SmartAIAssistant
-                areas={data.areas}
-                onAddGeneratedItem={(type, item) => onSaveItem(type, item)}
-              />
-            </div>
-          )}
-        </div>
       </section>
     </div>
   );

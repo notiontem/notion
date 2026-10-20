@@ -513,9 +513,20 @@ export default function App() {
               <span>대시보드</span>
             </button>
 
+            {/* 2. AI Ministry Assistant Studio */}
+            <button
+              onClick={() => { setActiveTab('ai-assistant'); setParaMenuOpen(false); }}
+              className={`nav-tab-btn ai-tab ${activeTab === 'ai-assistant' ? 'active' : ''}`}
+              title="설교 개요, 수련회 WBS, 심방 가이드 AI 즉시 기획"
+            >
+              <Sparkles size={15} className="ai-nav-icon" />
+              <span>AI 사역 기획실</span>
+              <span className="nav-tag-badge ai">AI</span>
+            </button>
+
             <div className="tab-nav-divider" />
 
-            {/* 2. Notice Writer */}
+            {/* 3. Notice Writer */}
             <button
               onClick={() => { setActiveTab('notice-writer'); setParaMenuOpen(false); }}
               className={`nav-tab-btn notice-tab ${activeTab === 'notice-writer' ? 'active' : ''}`}
@@ -787,6 +798,42 @@ export default function App() {
           <div className="fade-in">
             <SectionErrorBoundary onReset={() => setActiveTab('dashboard')}>
               <PricingSupportSection onNavigateTab={setActiveTab} />
+            </SectionErrorBoundary>
+          </div>
+        )}
+
+        {/* Tab: Dedicated Smart AI Assistant Studio */}
+        {activeTab === 'ai-assistant' && (
+          <div className="fade-in ai-assistant-page-view">
+            <div className="ai-page-hero">
+              <div className="ai-page-hero-left">
+                <div className="ai-page-badge">
+                  <Sparkles size={13} />
+                  <span>Smart Ministry AI Studio</span>
+                </div>
+                <h2 className="ai-page-title">스마트 목회 AI 사역 기획실</h2>
+                <p className="ai-page-desc">
+                  설교 본문 구상, 수련회 WBS 일정표, 심방 가이드, 찬양 콘티 등 사역 아이디어를 티아고 포르테의 PARA 구조로 정돈하고 노션(Notion)에 즉시 저장하세요.
+                </p>
+              </div>
+              <div className="ai-page-hero-right">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('dashboard')}
+                  className="btn-ai-back-dash"
+                >
+                  <LayoutDashboard size={14} />
+                  <span>대시보드로 돌아가기</span>
+                </button>
+              </div>
+            </div>
+
+            <SectionErrorBoundary onReset={() => setActiveTab('dashboard')}>
+              <SmartAIAssistant
+                areas={data.areas}
+                onAddGeneratedItem={handleSaveItem}
+                hideHeader={false}
+              />
             </SectionErrorBoundary>
           </div>
         )}

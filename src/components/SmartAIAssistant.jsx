@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PenTool, Copy, Check, Plus, RefreshCw, FileText } from 'lucide-react';
+import { PenTool, Copy, Check, Plus, RefreshCw, FileText, Sparkles } from 'lucide-react';
 import { generateMinistryContent, classifyPARA } from '../utils/aiGenerator';
 import {
   formatProjectForNotion,
@@ -10,15 +10,20 @@ import {
 } from '../utils/notionFormatter';
 
 const SAMPLE_PROMPTS = [
-  "로마서 8장 '결코 정죄함이 없나니' 4주 강해 설교",
-  "청년부 여름 수련회 기획안과 WBS 일정",
-  "질병과 상실을 겪는 가정을 위한 심방 위로 가이드",
-  "풍랑 속의 닻과 소망 (설교 예화 메모)",
-  "예배 회복과 결단을 위한 주일 찬양 5곡 콘티",
-  "새가족 4주 정착 바나바 사역 매뉴얼"
+  { text: "로마서 8장 '결코 정죄함이 없나니' 4주 강해 설교", tag: "설교" },
+  { text: "청년부 여름 수련회 기획안과 WBS 일정", tag: "행사" },
+  { text: "질병과 상실을 겪는 가정을 위한 심방 위로 가이드", tag: "심방" },
+  { text: "예배 회복과 결단을 위한 주일 찬양 5곡 콘티", tag: "예배" },
+  { text: "새가족 4주 정착 바나바 사역 매뉴얼", tag: "양육" },
+  { text: "풍랑 속의 닻과 소망 (설교 예화 메모)", tag: "자료" }
 ];
 
-export default function SmartAIAssistant({ onAddGeneratedItem, areas }) {
+export default function SmartAIAssistant({
+  onAddGeneratedItem,
+  areas,
+  hideHeader = false,
+  compactMode = false
+}) {
   const [prompt, setPrompt] = useState('');
   const [selectedType, setSelectedType] = useState('auto');
   const [generatedResult, setGeneratedResult] = useState(null);
@@ -87,18 +92,20 @@ export default function SmartAIAssistant({ onAddGeneratedItem, areas }) {
   };
 
   return (
-    <section className="assistant-card">
-      <div className="assistant-header">
-        <div className="assistant-badge">
-          <PenTool size={13} />
-          <span>사역 초안 작성기 (Drafting Desk)</span>
+    <section className={`assistant-card ${compactMode ? 'compact-desk' : ''}`}>
+      {!hideHeader && (
+        <div className="assistant-header">
+          <div className="assistant-badge">
+            <PenTool size={13} />
+            <span>사역 초안 작성기 (Drafting Desk)</span>
+          </div>
+          <h3 className="assistant-title">사역 아이디어와 메모를 노션 체계로 정돈합니다</h3>
+          <p className="assistant-desc">
+            설교 본문 구상, 수련회 일정, 심방 성도 메모를 자유롭게 적어보세요. 
+            티아고 포르테의 PARA 구조(프로젝트, 영역, 리소스, 보관함)에 맞추어 노션에 바로 붙여넣을 수 있는 아웃라인을 정리합니다.
+          </p>
         </div>
-        <h3 className="assistant-title">사역 아이디어와 메모를 노션 체계로 정돈합니다</h3>
-        <p className="assistant-desc">
-          설교 본문 구상, 수련회 일정, 심방 성도 메모를 자유롭게 적어보세요. 
-          티아고 포르테의 PARA 구조(프로젝트, 영역, 리소스, 보관함)에 맞추어 노션에 바로 붙여넣을 수 있는 아웃라인을 정리합니다.
-        </p>
-      </div>
+      )}
 
       {/* Input area */}
       <div className="assistant-input-box">
@@ -152,16 +159,18 @@ export default function SmartAIAssistant({ onAddGeneratedItem, areas }) {
 
         {/* Quick prompt suggestions */}
         <div className="quick-chips-wrap">
-          <span className="chips-label">예시 주제:</span>
+          <span className="chips-label">원클릭 추천 주제:</span>
           <div className="chips-list">
             {SAMPLE_PROMPTS.map((p, idx) => (
               <button
                 key={idx}
                 type="button"
-                onClick={() => handleQuickPrompt(p)}
+                onClick={() => handleQuickPrompt(p.text)}
                 className="chip-btn"
+                title={`클릭 시 '${p.text}' 초안 즉시 생성`}
               >
-                {p}
+                <span className="chip-tag">{p.tag}</span>
+                <span>{p.text}</span>
               </button>
             ))}
           </div>

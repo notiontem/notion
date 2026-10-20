@@ -664,6 +664,7 @@
 
 .nav-tab-btn.active,
 .nav-tab-btn.dashboard.active,
+.nav-tab-btn.ai-tab.active,
 .nav-tab-btn.notice-tab.active,
 .nav-tab-btn.event-tab.active,
 .nav-tab-btn.para-main-btn.active,
@@ -820,6 +821,32 @@
   background: rgba(255, 255, 255, 0.2);
   color: var(--bg-surface);
   border-color: rgba(255, 255, 255, 0.3);
+}
+
+.nav-tag-badge.ai {
+  font-size: 0.58rem;
+  font-weight: 700;
+  padding: 0.12rem 0.38rem;
+  border-radius: var(--radius-full);
+  background: rgba(139, 92, 246, 0.12);
+  color: #8b5cf6;
+  border: 1px solid rgba(139, 92, 246, 0.28);
+  line-height: 1;
+  letter-spacing: 0.03em;
+}
+
+.nav-tab-btn.active .nav-tag-badge.ai {
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--bg-surface);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.ai-nav-icon {
+  color: #8b5cf6;
+}
+
+.nav-tab-btn.active .ai-nav-icon {
+  color: var(--bg-surface);
 }
 
 .tab-badge-letter {
@@ -1069,19 +1096,33 @@
 }
 
 .chip-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   font-size: 0.74rem;
   color: var(--text-secondary);
   background: var(--bg-surface);
   border: 1px solid var(--border-color);
-  padding: 0.2rem 0.55rem;
+  padding: 0.25rem 0.65rem;
   border-radius: var(--radius-full);
-  transition: all 0.12s ease;
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.chip-tag {
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 0.05rem 0.35rem;
+  border-radius: 4px;
+  background: rgba(139, 92, 246, 0.12);
+  color: #8b5cf6;
 }
 
 .chip-btn:hover {
   background: var(--bg-subtle);
   color: var(--text-primary);
-  border-color: var(--text-muted);
+  border-color: #8b5cf6;
+  transform: translateY(-1px);
 }
 
 /* Assistant Result Box */
@@ -5667,78 +5708,239 @@ pre {
   transform: translateY(-1px);
 }
 
-/* 5. Collapsible AI Assistant Drawer */
-.ai-drawer-card {
+/* ==========================================================================
+   5. Promoted AI Ministry Studio (Golden Zone on Dashboard & Standalone View)
+   ========================================================================== */
+.dashboard-ai-studio-section {
+  margin-bottom: 2rem;
+}
+
+.dash-ai-studio-card {
   background: var(--bg-surface);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
   overflow: hidden;
+  position: relative;
+  transition: all 0.2s ease;
 }
 
-.ai-drawer-header {
-  padding: 1.25rem 1.6rem;
+.dash-ai-studio-card:hover {
+  border-color: rgba(139, 92, 246, 0.35);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.dash-ai-studio-header {
+  padding: 1.35rem 1.6rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  cursor: pointer;
-  transition: background 0.15s ease;
+  gap: 1.25rem;
+  border-bottom: 1px solid var(--border-subtle);
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.04) 0%, rgba(59, 130, 246, 0.03) 100%);
+  flex-wrap: wrap;
 }
 
-.ai-drawer-header:hover {
-  background: var(--bg-subtle);
-}
-
-.ai-drawer-title-wrap {
+.dash-ai-studio-title-wrap {
   display: flex;
-  align-items: center;
-  gap: 0.85rem;
+  align-items: flex-start;
+  gap: 0.9rem;
+  flex: 1;
+  min-width: 280px;
 }
 
-.ai-sparkle-icon {
-  width: 40px;
-  height: 40px;
+.dash-ai-studio-icon {
+  width: 44px;
+  height: 44px;
   border-radius: var(--radius-md);
-  background: linear-gradient(135deg, rgba(2, 132, 199, 0.15), rgba(139, 92, 246, 0.15));
-  color: #0284c7;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(59, 130, 246, 0.15));
+  color: #8b5cf6;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.15);
 }
 
-.ai-drawer-title-wrap h4 {
-  font-size: 0.98rem;
+.dash-ai-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 0.3rem;
+  flex-wrap: wrap;
+}
+
+.dash-ai-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #8b5cf6;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.dash-ai-pill {
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 0.1rem 0.45rem;
+  border-radius: var(--radius-full);
+  background: rgba(139, 92, 246, 0.1);
+  color: #8b5cf6;
+  border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.dash-ai-title {
+  font-size: 1.15rem;
   font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 0.2rem;
+  margin-bottom: 0.25rem;
+  line-height: 1.35;
 }
 
-.ai-drawer-title-wrap p {
-  font-size: 0.82rem;
-  color: var(--text-muted);
+.dash-ai-desc {
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
   margin: 0;
 }
 
-.btn-ai-toggle {
+.dash-ai-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.btn-ai-fullscreen {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.45rem 0.85rem;
+  gap: 0.4rem;
+  padding: 0.5rem 0.85rem;
   border-radius: var(--radius-sm);
-  background: var(--bg-subtle);
+  background: var(--bg-surface);
   border: 1px solid var(--border-color);
-  color: var(--text-secondary);
+  color: var(--text-primary);
   font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
+  transition: all 0.15s ease;
   white-space: nowrap;
 }
 
-.ai-drawer-body {
-  padding: 1.5rem;
-  border-top: 1px solid var(--border-subtle);
+.btn-ai-fullscreen:hover {
+  background: var(--text-primary);
+  color: var(--bg-surface);
+  border-color: var(--text-primary);
+}
+
+.btn-ai-toggle-compact {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn-ai-toggle-compact:hover {
+  color: var(--text-primary);
+  background: var(--bg-subtle-hover);
+}
+
+.dash-ai-studio-body {
+  padding: 1.5rem 1.6rem;
+}
+
+/* Compact mode for SmartAIAssistant when embedded inside Dashboard AI Card */
+.assistant-card.compact-desk {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  margin-bottom: 0;
+  box-shadow: none;
+}
+
+/* Standalone Dedicated AI Assistant Page View */
+.ai-assistant-page-view {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.ai-page-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 1.6rem 2rem;
+  box-shadow: var(--shadow-sm);
+  flex-wrap: wrap;
+}
+
+.ai-page-hero-left {
+  max-width: 720px;
+}
+
+.ai-page-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #8b5cf6;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.4rem;
+}
+
+.ai-page-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.4rem;
+  line-height: 1.3;
+}
+
+.ai-page-desc {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.btn-ai-back-dash {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.6rem 1.1rem;
+  border-radius: var(--radius-sm);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn-ai-back-dash:hover {
+  background: var(--text-primary);
+  color: var(--bg-surface);
+  border-color: var(--text-primary);
 }
 
 /* ==========================================================================
