@@ -28,9 +28,22 @@ export default function NotionBanner({
         <div className="sleek-banner-main">
           {/* Left info */}
           <div className="sleek-banner-left">
-            <div className="sleek-notion-tag">
-              <span className="notion-symbol-pill">N</span>
-              <span>Notion PARA 동반 도구</span>
+            <div className="sleek-notion-tag-row">
+              <div className="sleek-notion-tag">
+                <span className="notion-symbol-pill">N</span>
+                <span>Notion PARA 동반 도구</span>
+              </div>
+              <span className="sleek-tag-divider">·</span>
+              <a
+                href="https://bunker.ai.kr/qt/templates"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bunker-parent-link"
+                title="Bunker 목양 템플릿 나눔터 바로가기"
+              >
+                <span>Bunker 목양 템플릿 라운지</span>
+                <ExternalLink size={10} />
+              </a>
             </div>
             <div className="sleek-banner-titles">
               <h3>Ministry Second Brain</h3>
